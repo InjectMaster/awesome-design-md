@@ -68,12 +68,18 @@ official docs before pointing anything at real funds.**
 
 ```bash
 npm install
-npm run dev      # http://localhost:5173
-npm run build    # typecheck + production bundle
+npm run dev              # http://localhost:5173
+npm run build            # typecheck + production bundle
+npm run build:singlefile # one self-contained HTML file, no external requests
 npm run lint
 ```
 
 Requires Node 20+.
+
+`build:singlefile` inlines scripts, styles and webfonts into a single
+`dist-singlefile/index.html` and switches routing to the hash, for hosts that
+serve one static page with no rewrite rules. `vercel.json` covers the normal
+build with an SPA rewrite.
 
 ## Stack
 

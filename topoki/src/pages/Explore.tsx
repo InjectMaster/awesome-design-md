@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useEffect, useMemo, useRef, useState } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import {
   Badge,
   Button,
@@ -31,7 +31,8 @@ import {
   truncAddress,
   usd,
 } from '../lib/format'
-import { addressUrl, DEFAULT_CHAIN } from '../lib/chain'
+import { addressUrl, DEFAULT_CHAIN, txUrl } from '../lib/chain'
+import { CAT_SLEEP } from '../lib/ascii'
 
 type View = 'tokens' | 'pools' | 'transactions'
 type Filter = 'all' | 'eco' | 'stable' | 'meme'
@@ -41,6 +42,21 @@ export function ExplorePage() {
   const [q, setQ] = useState('')
   const [filter, setFilter] = useState<Filter>('all')
   const [detail, setDetail] = useState<string | null>(null)
+  const search = useRef<HTMLInputElement>(null)
+
+  // `/` jumps to the search field, the way it does in a terminal
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const el = document.activeElement
+      const typing = el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement
+      if (e.key === '/' && !typing) {
+        e.preventDefault()
+        search.current?.focus()
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
 
   return (
     <div className="mx-auto max-w-[1400px] space-y-4 px-4 py-6 sm:px-6">
@@ -56,9 +72,12 @@ export function ExplorePage() {
             <div className="hidden items-center gap-2 border border-line bg-ink-2 px-2 focus-within:border-ember/60 sm:flex">
               <span className="text-dust">/</span>
               <input
+                ref={search}
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
+                onKeyDown={(e) => e.key === 'Escape' && e.currentTarget.blur()}
                 placeholder="search"
+                aria-label="Search tokens, pools and transactions"
                 className="h-7 w-40 bg-transparent text-xs outline-none"
               />
             </div>
@@ -345,6 +364,7 @@ function TokensTable({
 function PoolsTable({ query }: { query: string }) {
   const [sort, setSort] = useState<keyof Pool>('tvl')
   const [dir, setDir] = useState<1 | -1>(-1)
+  const navigate = useNavigate()
 
   const rows = useMemo(() => {
     const needle = query.trim().toLowerCase()
@@ -393,7 +413,8 @@ function PoolsTable({ query }: { query: string }) {
           {rows.map((p, i) => (
             <tr
               key={p.id}
-              className="group border-b border-line/70 transition-colors hover:bg-ink-2"
+              onClick={() => navigate(`/swap?from=${p.base}&to=${p.quote}`)}
+              className="group cursor-pointer border-b border-line/70 transition-colors hover:bg-ink-2"
             >
               <td className="tnum px-3 py-2.5 text-dust">
                 {String(i + 1).padStart(2, '0')}
@@ -465,6 +486,7 @@ function TxTable({ query }: { query: string }) {
             <th className={cx(TH, 'text-left')}>Detail</th>
             <th className={cx(TH, 'text-right')}>Value</th>
             <th className={cx(TH, 'text-right')}>Account</th>
+            <th className={cx(TH, 'text-right')}>Tx</th>
             <th className={cx(TH, 'text-right')}>Time</th>
           </tr>
         </thead>
@@ -491,7 +513,8 @@ function TxTable({ query }: { query: string }) {
               <td className="px-3 py-2.5 text-ash">
                 <span className="tnum">
                   {fmtAmount(t.amountIn, 4)} <span className="text-bone">{t.from}</span>
-                  <span className="px-1.5 text-dust">→</span>
+                  {/* a swap moves value across; liquidity moves both sides at once */}
+                  <span className="px-1.5 text-dust">{t.kind === 'swap' ? '→' : '+'}</span>
                   {fmtAmount(t.amountOut, 4)} <span className="text-bone">{t.to}</span>
                 </span>
               </td>
@@ -506,6 +529,16 @@ function TxTable({ query }: { query: string }) {
                   className="text-smoke transition-colors hover:text-ember"
                 >
                   {truncAddress(t.account)}
+                </a>
+              </td>
+              <td className="tnum px-3 py-2.5 text-right">
+                <a
+                  href={txUrl(DEFAULT_CHAIN, t.hash)}
+                  target="_blank"
+                  rel="noreferrer noopener"
+                  className="text-dust transition-colors hover:text-ember"
+                >
+                  {truncAddress(t.hash, 8, 4)} ↗
                 </a>
               </td>
               <td className="tnum px-3 py-2.5 text-right text-smoke">
@@ -523,9 +556,7 @@ function TxTable({ query }: { query: string }) {
 function Empty() {
   return (
     <div className="flex flex-col items-center gap-3 py-14">
-      <pre className="ascii text-xs text-dust">
-        {['   /\\_/\\  ', '  ( -.- ) ', ' o_(")(")'].join('\n')}
-      </pre>
+      <pre className="ascii text-xs text-dust">{CAT_SLEEP.join('\n')}</pre>
       <p className="text-xs text-smoke">Nothing here. Try another search.</p>
     </div>
   )

@@ -23,16 +23,6 @@ export const CAT_MARK_BLINK = [
   ' > ^ < ',
 ]
 
-/** 6-line mascot with a 기와 roof over its head. Hero and empty states. */
-export const CAT_HERO = [
-  '        ______________        ',
-  '      /\\______________/\\      ',
-  '     /                  \\     ',
-  '      /\\_/\\      /\\_/\\       ',
-  '     ( o.o )    ( -.- )       ',
-  '      > ^ <      > ^ <        ',
-]
-
 /** The one true mascot: a sitting kitten, 8 lines. */
 export const CAT_SIT = [
   '   /\\     /\\   ',
@@ -77,11 +67,6 @@ export function roofline(cols: number): string[] {
     '╱‾╲'.repeat(tiles).slice(0, n),
     '│ │'.repeat(tiles).slice(0, n),
   ]
-}
-
-/** A single ridge of tiles, for thin divider bands. */
-export function tileBand(cols: number): string {
-  return '╱‾╲'.repeat(Math.ceil(cols / 3)).slice(0, cols)
 }
 
 /** The line GIWA builds its whole brand on. */
@@ -199,8 +184,6 @@ export function meter(ratio: number, width = 12, on = '█', off = '░'): strin
 /* --------------------------------------------------------------- motion -- */
 
 export const SPINNER = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏']
-export const PULSE = ['·', '∙', '●', '∙']
-export const SHUFFLE = '▚▞▛▜▟▙▄▀'
 
 /** Deterministic scramble used by the text-decode effect. */
 const SCRAMBLE_POOL = '▚▞01!<>-_\\/[]{}—=+*^?#$&%'

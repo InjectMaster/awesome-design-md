@@ -327,6 +327,9 @@ const ACCOUNTS = Array.from({ length: 24 }, (_, i) => hexAddress('acct:' + i))
 
 export function recentTrades(count = 40, now = Date.now()): Trade[] {
   const rnd = mulberry32(hashSeed('trades'))
+  // walk backwards in time by accumulating gaps, so the list is always
+  // strictly newest-first no matter what the gaps come out to
+  let elapsed = 0
   return Array.from({ length: count }, (_, i) => {
     const pool = POOLS[Math.floor(rnd() * POOLS.length)]
     const flip = rnd() > 0.5
@@ -336,6 +339,7 @@ export function recentTrades(count = 40, now = Date.now()): Trade[] {
     const amountIn = valueUsd / token(from).price
     const kindRoll = rnd()
     const kind: TxKind = kindRoll > 0.88 ? 'add' : kindRoll > 0.8 ? 'remove' : 'swap'
+    elapsed += 14 + rnd() * 420
     return {
       hash: hexAddress('tx:' + i).replace('0x', '0x') + hexAddress('tx2:' + i).slice(2, 26),
       kind,
@@ -344,7 +348,7 @@ export function recentTrades(count = 40, now = Date.now()): Trade[] {
       amountIn,
       amountOut: (valueUsd / token(to).price) * (1 - pool.feeBps / 10_000),
       valueUsd,
-      ts: now - Math.floor(i * (18 + rnd() * 260) * 1000),
+      ts: now - Math.floor(elapsed * 1000),
       account: ACCOUNTS[Math.floor(rnd() * ACCOUNTS.length)],
     }
   })

@@ -6,6 +6,7 @@ import {
   Delta,
   Panel,
   Rule,
+  Scramble,
   Tab,
   Tabs,
   TokenMark,
@@ -67,7 +68,7 @@ export function PortfolioPage() {
           <div className="flex flex-wrap items-end gap-x-8 gap-y-3">
             <div>
               <div className="tnum text-4xl leading-none text-bone sm:text-5xl">
-                {usd(total)}
+                <Scramble text={usd(total)} duration={700} />
               </div>
               <div className="mt-2 flex items-center gap-3">
                 <Delta value={day} className="text-xs" />
