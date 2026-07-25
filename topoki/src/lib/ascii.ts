@@ -1,6 +1,8 @@
 /* =========================================================================
-   ascii.ts — TOPOKI's drawing engine.
-   Everything visual that is not a rectangle is made of characters.
+   ascii.ts — TOPOKI's character art.
+   The typed half of the art direction: the mascot, the wordmark's glyph table,
+   the roofline and the copy that goes with them. Anything that has to hold a
+   pixel grid is painted instead — see `lib/dither.ts`.
    ========================================================================= */
 
 /* ---------------------------------------------------------------- mascot --
@@ -105,81 +107,12 @@ export function wordmark(word: string, gap = 1): string[] {
 }
 
 /* ---------------------------------------------------------------- charts --
-   Braille cells pack 2×4 dots per character, so an 80×12 text block is a
-   160×48 pixel plot. This is how TOPOKI draws price history.
+   Nothing here plots any more. Price history, sparklines and meters were
+   braille and block characters; the page face carries neither, so all three
+   moved onto the dither engine — see `lib/dither.ts`, `DitherChart`,
+   `PixelSpark` and `DitherBar`. What is left in this file is letter art,
+   which any face can set.
    ------------------------------------------------------------------------ */
-
-const BRAILLE_BASE = 0x2800
-const DOT_BITS = [
-  [0x01, 0x02, 0x04, 0x40], // left column, rows 0..3
-  [0x08, 0x10, 0x20, 0x80], // right column, rows 0..3
-]
-
-/**
- * Plot a series into a block of braille characters.
- * @param values  the series, any length — it is resampled to fit
- * @param cols    width in characters
- * @param rows    height in characters
- */
-export function brailleChart(values: number[], cols: number, rows: number): string[] {
-  if (values.length === 0 || cols < 1 || rows < 1) return Array(rows).fill('')
-
-  const w = cols * 2
-  const h = rows * 4
-  const cells = Array.from({ length: rows }, () => new Array(cols).fill(0))
-
-  const min = Math.min(...values)
-  const max = Math.max(...values)
-  const span = max - min || 1
-
-  const yAt = (i: number) => {
-    const t = (values.length - 1) * (i / Math.max(1, w - 1))
-    const lo = Math.floor(t)
-    const hi = Math.min(values.length - 1, lo + 1)
-    const v = values[lo] + (values[hi] - values[lo]) * (t - lo)
-    return Math.min(h - 1, Math.max(0, Math.round((1 - (v - min) / span) * (h - 1))))
-  }
-
-  let prev = yAt(0)
-  for (let x = 0; x < w; x++) {
-    const y = yAt(x)
-    // connect the dots vertically so the line never breaks
-    const from = Math.min(prev, y)
-    const to = Math.max(prev, y)
-    for (let yy = from; yy <= to; yy++) {
-      cells[Math.floor(yy / 4)][Math.floor(x / 2)] |= DOT_BITS[x % 2][yy % 4]
-    }
-    prev = y
-  }
-
-  return cells.map((row) =>
-    row.map((bits) => String.fromCharCode(BRAILLE_BASE + bits)).join(''),
-  )
-}
-
-const BLOCKS = ['▁', '▂', '▃', '▄', '▅', '▆', '▇', '█']
-
-/** One-line sparkline in block characters. Used in dense tables. */
-export function sparkline(values: number[], width = 16): string {
-  if (values.length === 0) return ''
-  const step = values.length / width
-  const bucket = Array.from({ length: width }, (_, i) => {
-    const slice = values.slice(Math.floor(i * step), Math.max(Math.floor((i + 1) * step), Math.floor(i * step) + 1))
-    return slice.reduce((a, b) => a + b, 0) / slice.length
-  })
-  const min = Math.min(...bucket)
-  const max = Math.max(...bucket)
-  const span = max - min || 1
-  return bucket
-    .map((v) => BLOCKS[Math.min(7, Math.floor(((v - min) / span) * 7.999))])
-    .join('')
-}
-
-/** Horizontal meter: ███████░░░░░ */
-export function meter(ratio: number, width = 12, on = '█', off = '░'): string {
-  const filled = Math.max(0, Math.min(width, Math.round(ratio * width)))
-  return on.repeat(filled) + off.repeat(width - filled)
-}
 
 /* --------------------------------------------------------------- motion -- */
 

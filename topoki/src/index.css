@@ -248,7 +248,7 @@
   color: var(--color-bone);
 }
 
-/* The only non-monospaced type in the app: Korean copy. */
+/* The only place a second family appears: Korean copy. */
 @utility kr {
   font-family: var(--font-kr);
   letter-spacing: -0.01em;
@@ -394,7 +394,7 @@
    CSS on a host page beats a layered rule no matter how specific it is — so
    when the app is embedded (a single-file build dropped into someone else's
    document), a host reset would silently take back the black ground and the
-   monospaced grid. The handful of declarations the whole design rests on are
+   pixel face. The handful of declarations the whole design rests on are
    restated here, unlayered and marked important, where nothing can win
    against them.
    ========================================================================= */

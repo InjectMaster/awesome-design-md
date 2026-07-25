@@ -1,7 +1,8 @@
 # TOPOKI — DESIGN.md
 
 ASCII-native decentralized exchange on **GIWA**, Korea's Ethereum Layer 2.
-Black, bone, one ember. Everything that is not a rectangle is made of characters.
+Black, bone, one ember. Everything that is not a rectangle is made of cells — typed
+as characters, or dithered pixel by pixel onto a canvas.
 
 ---
 
@@ -18,10 +19,13 @@ a chain named after roof tiles should have something sitting on the roof.
 
 Three rules govern every decision:
 
-1. **Monospace or nothing.** The interface is a character grid. Charts, logos, meters,
-   route diagrams and textures are all glyphs, not images.
+1. **Pixels or nothing.** The interface is a character grid, and everything drawn
+   into it is built from cells rather than curves: art is letter art, and charts,
+   meters and the wordmark are ordered-dithered pixels on a canvas. No photography,
+   no logo files, no anti-aliased illustration.
 2. **One accent.** Orange marks what is interactive, live, or yours. Nothing else is
-   coloured — including gains and losses, which are read from `▲`/`▼` and brightness.
+   coloured — including gains and losses, which are read from a caret and brightness.
+   The allocation ring is the single exception (§2).
 3. **Square, hairline, dense.** No rounded corners anywhere. No shadows except a single
    ember bloom. Borders are 1px and nearly black.
 
@@ -51,37 +55,48 @@ Three rules govern every decision:
 the primary action, the live indicator, and the data series. If a fourth appears,
 one of them is not important.
 
-**No green, no red-for-loss.** Direction is carried by `▲` / `▼` / `·` and by
-brightness — gains in `bone`, losses in `smoke`. This is the strictest rule in the
+**No green, no red-for-loss.** Direction is carried by a caret — a 4px CSS triangle
+up, down, or a square for flat, since the page face has no `▲`/`▼` — and by
+brightness: gains in `bone`, losses in `smoke`. This is the strictest rule in the
 system and the one that makes the whole thing look composed rather than crypto.
+
+**The one hue exception.** The portfolio allocation ring gives each asset its own
+colour, from the chart kit's series palette with ember first. A breakdown has to
+name which slice is which, and dither density alone stops separating slices past
+two or three of them. Nothing else in the app may reach into that palette: outside
+the ring, series colour is ember, and silence is `ash`.
 
 ---
 
 ## 3. Type
 
-Two faces, split by job — not by taste.
+One face, and one fallback for Korean.
 
-- **`Geist Pixel`** is the page face: prose, labels, buttons, token names, and any
-  headline figure that stands on its own (net worth, mid price, the swap amounts).
-  A pixel display face with a big x-height, so it holds up at 10px.
-- **`JetBrains Mono`** is the data face: every figure that shares a column with
-  another figure, and every piece of character art. Geist Pixel is proportional
-  and ships no tabular figures — it sets `1` narrower than `4`, so a column of
-  prices in it comes out ragged and a ticking counter jumps on each digit. It also
-  covers no block, box-drawing or braille glyphs, which is the entire alphabet the
-  art is drawn from.
-- **Korean copy** is set in **Pretendard** — the face GIWA itself uses.
+- **`Geist Pixel`** sets the entire app: prose, labels, buttons, token names, table
+  cells, and every figure. A pixel display face with a big x-height, so it holds up
+  at 10px, and the reason the interface reads as a screen rather than a document.
+- **Korean copy** asks for **Pretendard** — the face GIWA itself uses — then falls
+  back to whatever Korean face the system already has. Two decorative lines are not
+  worth a megabyte of webfont, so it is not self-hosted. This is the one place a
+  second family appears.
 
-Three utilities carry the split, and nothing else should set a family:
+The face is proportional, ships no tabular figures, and carries no block, box-drawing
+or braille glyphs. Everything that used to lean on a monospaced grid was rebuilt so it
+does not:
 
-| Utility | Face | For |
+| Utility | Does | For |
 |---|---|---|
 | *(default)* | Geist Pixel | all prose, labels, buttons |
-| `figure` | Geist Pixel | a headline number with nothing to line up against |
-| `tnum` | JetBrains Mono | any number in a column, and anything that ticks |
-| `ascii` | JetBrains Mono | character art — mascot, wordmark, roofline, meters |
+| `figure` | pixel face + `tnum` | a headline number — net worth, mid price, swap amounts |
+| `tnum` | asks for tabular figures | any number in a column, and anything that ticks |
+| `ascii` | `white-space: pre`, tight leading | letter art, set on `<AsciiArt>`'s own cells |
+| `kr` | the Korean stack | Korean copy only |
 
-A column of digits must never reflow. That rule outranks the choice of face.
+**A column of digits must never reflow**, and no face in the app can promise that on
+its own. So the rule is carried structurally instead: number columns are
+right-aligned, anything that ticks gets a fixed `min-width`, and letter art is laid
+out by `<AsciiArt>`, which gives every character its own fixed cell. Nothing may
+depend on the font to line up.
 
 | Role | Spec |
 |---|---|
@@ -113,31 +128,41 @@ two typographic signatures. Use them consistently or not at all.
 
 ---
 
-## 5. The ASCII layer
+## 5. The pixel layer
 
-This is what makes it TOPOKI rather than another dark DEX.
+This is what makes it TOPOKI rather than another dark DEX. It has two halves:
+**letter art**, which is typed, and **painted art**, which is dithered onto a canvas.
+The split exists because the page face carries no block, box-drawing or braille
+glyphs — so anything that needed those characters is painted from the same bitmap it
+used to be typed from, one rect per pixel.
 
-- **Mascot.** A kitten at three densities: a 3-line mark (`/\_/\` `( o.o )` `> ^ <`)
-  in the header that blinks on an irregular 3–7s cadence; an 8-line sitting kitten
-  for empty states and the boot screen; alarmed and sleeping variants for errors and
-  no-results.
-- **Wordmark.** A 5-row block face (`█`) assembled at runtime from a glyph table, so
-  columns can never drift.
-- **Charts.** Price history is **ordered-dithered** on a low-resolution canvas
-  scaled up `pixelated`: a 4×4 Bayer matrix decides each 2px cell, dense at the
+- **Mascot** *(typed)*. A kitten at three densities: a 3-line mark (`/\_/\` `( o.o )`
+  `> ^ <`) in the header that blinks on an irregular 3–7s cadence; an 8-line sitting
+  kitten for empty states and the boot screen; alarmed and sleeping variants for
+  errors and no-results. Set through `<AsciiArt>`, one fixed cell per character, so
+  it lines up in a proportional face.
+- **Wordmark and roofline** *(painted)*. The wordmark is a 5-row block face assembled
+  from a glyph table; the roofline is a 기와 roof running edge-to-edge along the bottom
+  of the viewport at low opacity — the direct quote from GIWA's own brand texture.
+  Both are painted on canvas, so their columns can never drift.
+- **Charts** *(painted)*. Price history is **ordered-dithered** on a low-resolution
+  canvas scaled up `pixelated`: a 4×4 Bayer matrix decides each 2px cell, dense at the
   floor and dissolving upward toward the value line, with a blurred additive copy
-  behind it for the ember bloom. Fill strength is held at 0.6 — at full strength
-  the floor goes solid and one chart spends the page's whole ember budget.
-  Allocation meters run the same matrix at constant vertical density, dissolving
-  toward the tip. Engine vendored from dither-kit (MIT); see `lib/dither.ts`.
-- **Sparklines.** Dense table rows keep single-row **braille** plots — 2×4 dots per
-  character, selectable text, and legible at 13px where a 2px dither cell is mush.
-- **Roofline.** A 기와 roof drawn in `▁ █ ╱‾╲ │` runs edge-to-edge along the bottom of
-  the viewport at low opacity. This is the direct quote from GIWA's own brand texture.
+  behind it for the ember bloom. Fill strength is held at 0.6 — at full strength the
+  floor goes solid and one chart spends the page's whole ember budget. Engine and the
+  chart chrome around it (tooltip, legend, scales, polar geometry) are vendored from
+  dither-kit (MIT) into `lib/dither.ts` and `components/dither-kit/`.
+- **Meters, sparklines and the allocation ring** *(painted)*. All three run the same
+  Bayer loop as the charts, which is the point — a solid bar beside a dithered chart
+  reads as two systems. Meters hold constant vertical density and dissolve toward the
+  tip; table sparklines are the column fill two cells tall, ember when the series
+  closed up and `ash` when it closed down; the ring falls off toward its inner radius
+  and is the one place hue is used to separate series (§2).
 - **Token marks.** No logo images. Each token is a two-letter monogram in a hairline
   box with a single corner pip whose position is hashed from the symbol.
-- **Route diagram.** Swap routes are wire diagrams: boxed tokens joined by `──▶` with
-  the fee tier above each hop.
+- **Route diagram.** Swap routes are wire diagrams: each token in a hairline box,
+  joined by an ember `-->` with the fee tier above each hop. Plain ASCII, because
+  box-drawing arrows are exactly the glyphs the page face does not have.
 - **Boot.** A ~1.8s cold start prints chain, RPC, pool count and `ok`, once per tab,
   skipped entirely under `prefers-reduced-motion`.
 
@@ -172,8 +197,8 @@ Disabled drops to 45% and stops responding to hover.
 **Field** — inset `ink-2` box: label and balance on the top row, a `2xl` tabular amount
 on the left, token selector on the right, USD value beneath in `dust`.
 
-**Table** — sticky `ink` head with `label` type, sortable columns marked by `▲`/`▼` in
-ember, rows separated by `line/70`, `ink-2` on hover, first cell `bone` and the rest
+**Table** — sticky `ink` head with `label` type, sortable columns marked by the ember
+caret, rows separated by `line/70`, `ink-2` on hover, first cell `bone` and the rest
 `ash`.
 
 **Modal** — `void/85` + 2px blur + dot matrix over the page, square `ink` dialog with a

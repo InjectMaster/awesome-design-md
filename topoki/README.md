@@ -8,8 +8,8 @@
 
 A decentralized exchange front end for **GIWA**, the Ethereum Layer 2 built on the OP
 Stack by Dunamu / Upbit. Three pages — **Swap**, **Explore**, **Portfolio** — drawn as
-a monochrome terminal with a single ember accent. Charts, logos, meters and textures
-are all made of characters.
+a monochrome terminal with a single ember accent. The mascot is typed; charts, logos,
+meters and textures are ordered-dithered pixels. Nothing is an image file.
 
 The art direction is documented in [`DESIGN.md`](./DESIGN.md).
 
@@ -83,24 +83,30 @@ build with an SPA rewrite.
 
 ## Stack
 
-React 19 · TypeScript · Vite 8 · Tailwind CSS 4 · React Router 7. Fonts (JetBrains
-Mono, IBM Plex Mono, Pretendard) are self-hosted — the app makes no third-party
-requests at runtime.
+React 19 · TypeScript · Vite 8 · Tailwind CSS 4 · React Router 7. The app is set in a
+single self-hosted face, **Geist Pixel**; Korean copy asks for Pretendard and falls
+back to a system face rather than shipping a second webfont. Charts are dither-kit
+(MIT) vendored into `src/components/dither-kit/`, not a dependency. Nothing is
+fetched from a third party at runtime.
 
 ## Layout
 
 ```
 src/
   lib/
-    ascii.ts       mascot, wordmark font, braille plotter, roofline generator
+    ascii.ts       mascot, wordmark glyph table, roofline generator, scramble
+    dither.ts      the Bayer paint engine — vendored from dither-kit (MIT)
     market.ts      seeded market: tokens, pools, routing, quoting, activity
     chain.ts       GIWA network parameters
     wallet.tsx     EIP-1193 connector + demo account
     portfolio.ts   balances, holdings, LP positions
     format.ts      every number in the app passes through here
   components/
+    dither-kit/    vendored chart parts: paint, palette, scales, polar, tooltip…
     primitives.tsx Panel, Button, Badge, Delta, Tabs, TokenMark, Scramble…
-    charts.tsx     braille chart, sparkline, allocation bars
+    PixelArt.tsx   AsciiArt cells, painted wordmark + roofline, PixelSpark
+    DitherChart.tsx  area/line chart   DitherPie.tsx  allocation ring
+    DitherBar.tsx  meters             charts.tsx     Spark + BarRow wrappers
     Chrome.tsx     backdrop, roofline, price tape, status bar
     Header.tsx     nav, network chip, wallet modal
     Modal.tsx      TokenSelect.tsx  BootScreen.tsx  Logo.tsx
@@ -113,4 +119,4 @@ src/
 Focus is a 1px ember outline at 2px offset, never removed. All motion collapses under
 `prefers-reduced-motion`, including the boot screen, which is skipped entirely. ASCII
 art is `aria-hidden` with text alternatives on the elements that carry meaning. Colour
-never encodes direction on its own — `▲` / `▼` and brightness do.
+never encodes direction on its own — the caret and brightness do.

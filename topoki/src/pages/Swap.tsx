@@ -363,7 +363,9 @@ function Field({
 }
 
 /* ------------------------------------------------------------------ route --
-   The route is drawn as a wire diagram in box characters.
+   The route is a wire diagram: hairline boxes joined by an ASCII arrow. The hops
+   used to be box-drawing characters, which the page face does not carry, so the
+   boxes are borders now and the arrow stays inside plain ASCII.
    -------------------------------------------------------------------------*/
 
 function RouteDiagram({ quote }: { quote: Quote }) {

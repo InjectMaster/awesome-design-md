@@ -15,9 +15,11 @@ import { cx } from '../lib/cx'
 
    Slice geometry is dither-kit's `polar.ts` (pieSlices / sliceAtAngle) and the
    texture is its Bayer matrix, so a slice reads with exactly the pixel density
-   of the area charts. Density falls off toward the inner radius, which is what
-   separates neighbouring slices without ever introducing a second colour:
-   TOPOKI has one accent, so slices are told apart by *density*, not by hue.
+   of the area charts. Density falls off toward the inner radius, and each slice
+   takes one hue from the kit's series palette — ember first, so the accent still
+   leads. This ring is the single place in TOPOKI that carries more than one
+   colour: a holdings breakdown has to name which slice is which, and density
+   alone cannot do that past two or three assets.
    ========================================================================= */
 
 export interface PieDatum {

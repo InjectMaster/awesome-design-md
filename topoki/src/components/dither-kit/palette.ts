@@ -1,10 +1,11 @@
 // Shared seed palette for the dither chart family.
 //
-// TOPOKI note: the upstream seeds (green/blue/purple/pink/red) are replaced by
-// the app's own two-tone system — one ember, one ash — so a chart can never
-// introduce a colour the design system does not have. The seed *shape*
-// (fill/line/star) is upstream's, and `orange` keeps its name so kit
-// components that default to it land on the accent.
+// TOPOKI note: every chart runs on the app's own two-tone system — one ember,
+// one ash — so nothing in the interface introduces a colour the design system
+// does not have. Upstream's hues stay in the table for the one chart that must
+// separate many series at once (the allocation ring); no other component may
+// reach for them. The seed *shape* (fill/line/star) is upstream's, and `orange`
+// keeps its name so kit components that default to it land on the accent.
 
 export type Rgb = [number, number, number]
 

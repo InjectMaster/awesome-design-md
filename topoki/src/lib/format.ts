@@ -43,10 +43,6 @@ export function pct(n: number, digits = 2): string {
   return (n > 0 ? '+' : n < 0 ? '-' : '') + s
 }
 
-export function signGlyph(n: number): string {
-  return n > 0 ? '▲' : n < 0 ? '▼' : '·'
-}
-
 export function truncAddress(a: string, head = 6, tail = 4): string {
   if (!a) return ''
   return a.length <= head + tail + 2 ? a : `${a.slice(0, head)}…${a.slice(-tail)}`
