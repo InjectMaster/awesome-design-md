@@ -356,3 +356,44 @@
 @utility mask-fade-x {
   mask-image: linear-gradient(to right, transparent, #000 6%, #000 94%, transparent);
 }
+
+/* =========================================================================
+   Ground truth — deliberately outside every cascade layer.
+
+   TOPOKI is a single-theme interface. It is a black terminal in every
+   context: there is no light variant, and a viewer's theme toggle does not
+   change that. Everything above lives in `@layer base`, and any unlayered
+   CSS on a host page beats a layered rule no matter how specific it is — so
+   when the app is embedded (a single-file build dropped into someone else's
+   document), a host reset would silently take back the black ground and the
+   monospaced grid. The handful of declarations the whole design rests on are
+   restated here, unlayered and marked important, where nothing can win
+   against them.
+   ========================================================================= */
+
+html,
+:root,
+:root[data-theme='light'],
+:root[data-theme='dark'] {
+  color-scheme: dark !important;
+  background-color: #050505 !important;
+}
+
+body {
+  margin: 0 !important;
+  background-color: #050505 !important;
+  color: #f5f5f0 !important;
+  /* every glyph in TOPOKI sits on the character grid, digits included */
+  font-family:
+    'JetBrains Mono Variable', 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo,
+    Consolas, monospace !important;
+  font-variant-ligatures: none !important;
+  line-height: 1.5;
+}
+
+/* Korean copy is the one exception, and it must survive the rule above. */
+body .kr {
+  font-family:
+    'Pretendard Variable', Pretendard, 'Noto Sans KR', 'Apple SD Gothic Neo',
+    'Malgun Gothic', system-ui, sans-serif !important;
+}
