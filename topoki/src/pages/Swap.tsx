@@ -11,7 +11,8 @@ import {
   TokenMark,
 } from '../components/primitives'
 import { cx } from '../lib/cx'
-import { AsciiChart, Spark } from '../components/charts'
+import { Spark } from '../components/charts'
+import { DitherChart } from '../components/DitherChart'
 import { Modal } from '../components/Modal'
 import { TokenSelect } from '../components/TokenSelect'
 import { useWallet } from '../lib/wallet'
@@ -186,7 +187,7 @@ export function SwapPage() {
                   tone={q.priceImpact > 3 ? 'warn' : 'default'}
                   v={
                     <span className="flex items-center gap-2">
-                      <span className="ascii text-[10px] leading-none">
+                      <span className="ascii-grid text-[10px] leading-none">
                         <span className="text-ember">
                           {meter(Math.min(1, q.priceImpact / 10), 8, '█', '')}
                         </span>
@@ -284,7 +285,13 @@ export function SwapPage() {
             </div>
           </div>
 
-          <AsciiChart series={pairSeries} rows={12} label={`${from}/${to} · 168H`} />
+          <DitherChart
+            series={pairSeries}
+            height={168}
+            bloom="low"
+            label={`${from}/${to} · 168H`}
+            format={(n) => fmtAmount(n, 6)}
+          />
         </Panel>
 
         <div className="grid gap-4 sm:grid-cols-2">

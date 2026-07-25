@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { brailleChart, sparkline } from '../lib/ascii'
 import { cx } from '../lib/cx'
 import { price as fmtPrice } from '../lib/format'
+import { DitherBar } from './DitherBar'
 
 /* -------------------------------------------------------------- sparkline --
    A single line of block characters. Cheap enough for every table row.
@@ -31,7 +32,7 @@ export function Spark({
     <span
       aria-hidden
       className={cx(
-        'ascii text-[13px] leading-none',
+        'ascii-grid text-[13px] leading-none',
         up ? 'text-ember/90' : 'text-smoke',
         className,
       )}
@@ -143,22 +144,16 @@ export function BarRow({
   label,
   ratio,
   value,
-  width = 20,
 }: {
   label: string
   ratio: number
   value: string
-  width?: number
 }) {
-  const filled = Math.max(1, Math.round(ratio * width))
   return (
     <div className="flex items-center gap-3 py-1 text-xs">
       <span className="w-16 shrink-0 truncate text-ash">{label}</span>
-      <span className="ascii text-[11px] leading-none tracking-tighter">
-        <span className="text-ember">{'█'.repeat(filled)}</span>
-        <span className="text-line">{'█'.repeat(Math.max(0, width - filled))}</span>
-      </span>
-      <span className="tnum ml-auto text-smoke">{value}</span>
+      <DitherBar ratio={ratio} className="max-w-[168px] flex-1" />
+      <span className="tnum shrink-0 text-smoke">{value}</span>
     </div>
   )
 }

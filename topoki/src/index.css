@@ -1,5 +1,11 @@
 @import 'tailwindcss';
 
+/* DotGothic16 — a 16-dot bitmap gothic. The page face: every label, figure
+   and table cell is set in it. Latin subset only (10 kB): its box-drawing and
+   block glyphs are full-width, and it has no braille at all, so the character
+   art keeps a true half-width grid font underneath (see --font-grid). */
+@import '@fontsource/dotgothic16/latin-400.css';
+
 @import '@fontsource-variable/jetbrains-mono/index.css';
 @import '@fontsource/ibm-plex-mono/400.css';
 @import '@fontsource/ibm-plex-mono/500.css';
@@ -42,9 +48,14 @@
 
   /* --- type system ---------------------------------------------------- */
   --font-mono:
-    'JetBrains Mono Variable', 'IBM Plex Mono', ui-monospace, SFMono-Regular,
-    Menlo, Consolas, monospace;
-  --font-display: 'IBM Plex Mono', 'JetBrains Mono Variable', ui-monospace, monospace;
+    'DotGothic16', 'JetBrains Mono Variable', 'IBM Plex Mono', ui-monospace,
+    SFMono-Regular, Menlo, Consolas, monospace;
+  /* The grid face, for art that mixes letters with block and braille glyphs:
+     one advance width across every character DotGothic16 splits or lacks. */
+  --font-grid:
+    'JetBrains Mono Variable', 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo,
+    Consolas, monospace;
+  --font-display: 'DotGothic16', 'JetBrains Mono Variable', ui-monospace, monospace;
   /* GIWA sets its Korean copy in Pretendard. TOPOKI asks for it, then falls
      back to whatever Korean face the system already has — a couple of
      decorative lines are not worth a megabyte of webfont. */
@@ -335,9 +346,21 @@
   }
 }
 
-/* Pre-formatted ASCII art blocks. */
+/* Pre-formatted character art. Pure-Latin art (the kitten) reads best in the
+   dot face, so this inherits the page font. */
 @utility ascii {
   font-family: var(--font-mono);
+  white-space: pre;
+  line-height: 1.06;
+  letter-spacing: 0;
+  font-variant-ligatures: none;
+}
+
+/* Art that mixes letters with block, box-drawing or braille glyphs — the
+   wordmark, the roofline, the meters, the sparklines. Pinned to the grid face
+   so every glyph on the line shares one advance width. */
+@utility ascii-grid {
+  font-family: var(--font-grid) !important;
   white-space: pre;
   line-height: 1.06;
   letter-spacing: 0;
@@ -385,10 +408,17 @@ body {
   color: #f5f5f0 !important;
   /* every glyph in TOPOKI sits on the character grid, digits included */
   font-family:
-    'JetBrains Mono Variable', 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo,
-    Consolas, monospace !important;
+    'DotGothic16', 'JetBrains Mono Variable', 'IBM Plex Mono', ui-monospace,
+    SFMono-Regular, Menlo, Consolas, monospace !important;
   font-variant-ligatures: none !important;
   line-height: 1.5;
+}
+
+/* Character art on the grid face has to survive the rule above too. */
+body .ascii-grid {
+  font-family:
+    'JetBrains Mono Variable', 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo,
+    Consolas, monospace !important;
 }
 
 /* Korean copy is the one exception, and it must survive the rule above. */

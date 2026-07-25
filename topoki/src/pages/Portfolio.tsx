@@ -12,7 +12,8 @@ import {
   TokenMark,
 } from '../components/primitives'
 import { cx } from '../lib/cx'
-import { AsciiChart, BarRow, Spark } from '../components/charts'
+import { BarRow, Spark } from '../components/charts'
+import { DitherChart } from '../components/DitherChart'
 import { useWallet } from '../lib/wallet'
 import { useHoldings, usePositions } from '../lib/portfolio'
 import { portfolioSeries, recentTrades, token } from '../lib/market'
@@ -85,7 +86,13 @@ export function PortfolioPage() {
           <Rule className="my-4" />
 
           {series.length > 0 && (
-            <AsciiChart series={series} rows={10} label="Portfolio · 168H" />
+            <DitherChart
+              series={series}
+              height={148}
+              bloom="low"
+              label="Portfolio · 168H"
+              format={(n) => usd(n, { compact: true })}
+            />
           )}
         </Panel>
 
@@ -274,7 +281,7 @@ function Positions() {
 
             <div className="mt-4">
               <div className="label mb-1.5">Range</div>
-              <div className="ascii text-[11px] leading-none">
+              <div className="ascii-grid text-[11px] leading-none">
                 <span className="text-line-2">{meter(ratio, 24, '─', '─')}</span>
               </div>
               <div className="relative -mt-[7px] h-3">

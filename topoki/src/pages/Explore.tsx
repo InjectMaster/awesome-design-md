@@ -11,7 +11,8 @@ import {
   TokenMark,
 } from '../components/primitives'
 import { cx } from '../lib/cx'
-import { AsciiChart, Spark } from '../components/charts'
+import { Spark } from '../components/charts'
+import { DitherChart } from '../components/DitherChart'
 import { Modal } from '../components/Modal'
 import {
   POOLS,
@@ -164,7 +165,13 @@ function GlobalStats() {
           <BigStat label="Pools" value={String(STATS.pools)} />
         </div>
         <Rule className="my-4" />
-        <AsciiChart series={tvlSeries} rows={8} label="TVL · 168H" />
+        <DitherChart
+          series={tvlSeries}
+          height={116}
+          bloom="low"
+          label="TVL · 168H"
+          format={(n) => usd(n, { compact: true })}
+        />
       </Panel>
 
       <Panel title="Network" tone="raised">
@@ -596,7 +603,7 @@ function TokenDetail({ symbol, onClose }: { symbol: string | null; onClose: () =
             </div>
           </div>
 
-          <AsciiChart series={t.series} rows={10} label={`${t.symbol} · 168H`} />
+          <DitherChart series={t.series} height={148} bloom="high" label={`${t.symbol} · 168H`} />
 
           <div className="grid grid-cols-2 gap-4 border-y border-line py-4 sm:grid-cols-4">
             <BigStat label="TVL" value={usd(t.tvl, { compact: true })} />

@@ -40,7 +40,7 @@ function Roofline() {
   }, [])
 
   return (
-    <pre className="ascii absolute inset-x-0 bottom-9 text-[10px] leading-[1.15] text-line-3 opacity-80 sm:text-[11px]">
+    <pre className="ascii-grid absolute inset-x-0 bottom-9 text-[10px] leading-[1.15] text-line-3 opacity-80 sm:text-[11px]">
       {roofline(cols).join('\n')}
     </pre>
   )

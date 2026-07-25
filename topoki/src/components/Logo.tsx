@@ -55,7 +55,7 @@ export function Wordmark({
   className?: string
 }) {
   return (
-    <span aria-label={text} className={cx('ascii block', className)}>
+    <span aria-label={text} className={cx('ascii-grid block', className)}>
       {wordmark(text).join('\n')}
     </span>
   )
