@@ -59,7 +59,7 @@ export function Modal({
             aria-label="Close"
             className="flex size-6 items-center justify-center border border-line text-smoke transition-colors hover:border-ember hover:text-ember"
           >
-            ✕
+            x
           </button>
         </header>
         <div className="max-h-[70vh] overflow-y-auto">{children}</div>

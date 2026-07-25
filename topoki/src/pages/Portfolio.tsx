@@ -5,19 +5,20 @@ import {
   Button,
   Delta,
   Panel,
-  Rule,
   Scramble,
   Tab,
   Tabs,
   TokenMark,
 } from '../components/primitives'
 import { cx } from '../lib/cx'
-import { BarRow, Spark } from '../components/charts'
+import { Spark } from '../components/charts'
+import { DitherPie } from '../components/DitherPie'
 import { DitherChart } from '../components/DitherChart'
 import { useWallet } from '../lib/wallet'
+import { AsciiArt } from '../components/PixelArt'
 import { useHoldings, usePositions } from '../lib/portfolio'
 import { portfolioSeries, recentTrades, token } from '../lib/market'
-import { CAT_SIT, GIWA_PROVERB, meter } from '../lib/ascii'
+import { CAT_SIT, GIWA_PROVERB } from '../lib/ascii'
 import {
   ago,
   amount as fmtAmount,
@@ -36,6 +37,21 @@ export function PortfolioPage() {
   const series = useMemo(
     () => (holdings.length ? portfolioSeries(holdings) : []),
     [holdings],
+  )
+
+  // one ring for the whole book: spot holdings and LP positions together
+  const allocation = useMemo(
+    () =>
+      [
+        ...holdings.map((h) => ({ name: h.symbol, value: h.valueUsd })),
+        ...positions.map((p) => ({
+          name: `${p.base}/${p.quote} LP`,
+          value: p.valueUsd,
+        })),
+      ]
+        .sort((a, b) => b.value - a.value)
+        .slice(0, 12),
+    [holdings, positions],
   )
 
   if (!wallet.address) return <Disconnected />
@@ -62,62 +78,48 @@ export function PortfolioPage() {
               rel="noreferrer noopener"
               className="tnum text-2xs text-smoke transition-colors hover:text-ember"
             >
-              {truncAddress(wallet.address, 8, 6)} ↗
+              {truncAddress(wallet.address, 8, 6)}&nbsp;&gt;
             </a>
           }
         >
-          <div className="flex flex-wrap items-end gap-x-8 gap-y-3">
+          {/* the figure sits left, the curve runs beside it in the same box */}
+          <div className="grid gap-5 lg:grid-cols-[minmax(0,15rem)_minmax(0,1fr)] lg:items-center">
             <div>
-              <div className="figure text-4xl leading-none text-bone sm:text-5xl">
+              <div className="figure text-4xl leading-none text-bone">
                 <Scramble text={usd(total)} duration={700} />
               </div>
               <div className="mt-2 flex items-center gap-3">
                 <Delta value={day} className="text-xs" />
                 <span className="text-2xs text-smoke">24 hours</span>
               </div>
+              <div className="mt-5 grid grid-cols-2 gap-4 border-t border-line pt-4">
+                <Mini label="Unrealised P&L" value={usd(pnl)} accent={pnl >= 0} />
+                <Mini label="Positions" value={String(positions.length)} />
+                <Mini label="Assets" value={String(holdings.length)} />
+                <Mini label="Networks" value="1" />
+              </div>
             </div>
-            <div className="flex gap-6">
-              <Mini label="Unrealised P&L" value={usd(pnl)} accent={pnl >= 0} />
-              <Mini label="Positions" value={String(positions.length)} />
-              <Mini label="Assets" value={String(holdings.length)} />
-            </div>
+
+            {series.length > 0 && (
+              <DitherChart
+                series={series}
+                height={196}
+                bloom="low"
+                label="Portfolio · 168H"
+                seriesName="Net worth"
+                format={(n) => usd(n, { compact: true })}
+              />
+            )}
           </div>
-
-          <Rule className="my-4" />
-
-          {series.length > 0 && (
-            <DitherChart
-              series={series}
-              height={148}
-              bloom="low"
-              label="Portfolio · 168H"
-              format={(n) => usd(n, { compact: true })}
-            />
-          )}
         </Panel>
 
         <Panel title="Allocation" tone="raised">
-          <div className="space-y-0.5">
-            {holdings.slice(0, 7).map((h) => (
-              <BarRow
-                key={h.symbol}
-                label={h.symbol}
-                ratio={h.valueUsd / (holdings[0]?.valueUsd || 1)}
-                value={usd(h.valueUsd, { compact: true })}
-              />
-            ))}
-          </div>
-          <Rule className="my-4" label="lp" />
-          <div className="space-y-0.5">
-            {positions.map((p) => (
-              <BarRow
-                key={p.poolId}
-                label={`${p.base}/${p.quote}`}
-                ratio={p.valueUsd / (positions[0]?.valueUsd || 1)}
-                value={usd(p.valueUsd, { compact: true })}
-              />
-            ))}
-          </div>
+          <DitherPie
+            data={allocation}
+            size={168}
+            format={(n) => usd(n, { compact: true })}
+            className="flex-col sm:flex-row lg:flex-col xl:flex-row"
+          />
         </Panel>
       </div>
 
@@ -220,7 +222,7 @@ function HoldingsTable() {
                   {usd(Math.abs(pnl)).slice(1)}
                 </td>
                 <td className="px-3 py-2.5 text-right">
-                  <Spark series={t.series} width={16} />
+                  <Spark series={t.series} />
                 </td>
                 <td className="px-3 py-2.5 text-right">
                   <Link
@@ -281,15 +283,13 @@ function Positions() {
 
             <div className="mt-4">
               <div className="label mb-1.5">Range</div>
-              <div className="ascii text-[11px] leading-none">
-                <span className="text-line-2">{meter(ratio, 24, '─', '─')}</span>
-              </div>
+              <div className="h-px w-full bg-line-2" />
               <div className="relative -mt-[7px] h-3">
                 <span
                   className="absolute text-ember"
                   style={{ left: `calc(${ratio * 100}% - 4px)` }}
                 >
-                  ◆
+                  <span className="block size-1.5 rotate-45 bg-ember" />
                 </span>
               </div>
               <div className="tnum mt-1 flex justify-between text-2xs text-smoke">
@@ -337,12 +337,12 @@ function Activity({ address }: { address: string }) {
                 : 'border-line-2 text-smoke',
             )}
           >
-            {t.kind === 'swap' ? '⇅' : t.kind === 'add' ? '+' : '−'}
+            {t.kind === 'swap' ? 'S' : t.kind === 'add' ? '+' : '-'}
           </span>
           <span className="min-w-0">
             <span className="block text-bone">
               {t.kind === 'swap'
-                ? `Swap ${t.from} → ${t.to}`
+                ? `Swap ${t.from} -> ${t.to}`
                 : t.kind === 'add'
                   ? `Add ${t.from}/${t.to}`
                   : `Remove ${t.from}/${t.to}`}
@@ -367,9 +367,7 @@ function Disconnected() {
   const wallet = useWallet()
   return (
     <div className="mx-auto flex max-w-[1400px] flex-col items-center px-4 py-20 text-center sm:py-28">
-      <pre className="ascii text-[10px] leading-[1.05] text-ember sm:text-sm">
-        {CAT_SIT.join('\n')}
-      </pre>
+<AsciiArt lines={CAT_SIT} className="text-[11px] text-ember sm:text-sm" />
       <h1 className="display mt-8 text-3xl sm:text-5xl">
         Nothing to show.
         <br />

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
-import { CAT_MARK, CAT_MARK_BLINK, wordmark } from '../lib/ascii'
+import { CAT_MARK, CAT_MARK_BLINK } from '../lib/ascii'
 import { cx } from '../lib/cx'
+import { AsciiArt } from './PixelArt'
 
 /** The kitten. Blinks on a lazy, slightly irregular cadence. */
 export function CatMark({
@@ -31,35 +32,20 @@ export function CatMark({
   const art = blink ? CAT_MARK_BLINK : CAT_MARK
 
   return (
-    <span
-      aria-hidden
+    <AsciiArt
+      lines={art}
       className={cx(
-        'ascii block text-ember transition-colors duration-300',
-        size === 'sm' && 'text-[7px] leading-[1.1]',
-        size === 'md' && 'text-[9px] leading-[1.1]',
-        size === 'lg' && 'text-[14px] leading-[1.1]',
+        'text-ember transition-colors duration-300',
+        size === 'sm' && 'text-[8px]',
+        size === 'md' && 'text-[10px]',
+        size === 'lg' && 'text-[15px]',
         className,
       )}
-    >
-      {art.join('\n')}
-    </span>
+    />
   )
 }
 
-/** Block-face wordmark, assembled from the ASCII font. */
-export function Wordmark({
-  text = 'TOPOKI',
-  className,
-}: {
-  text?: string
-  className?: string
-}) {
-  return (
-    <span aria-label={text} className={cx('ascii block', className)}>
-      {wordmark(text).join('\n')}
-    </span>
-  )
-}
+
 
 /** Header lockup: kitten + name + chain tag. */
 export function Lockup() {

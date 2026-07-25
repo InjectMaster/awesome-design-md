@@ -76,7 +76,7 @@ export const GIWA_PROVERB = '기와가 맞물려 지붕을 이루듯, 작은 연
    A 5-row block face, assembled at runtime so columns can never drift.
    ------------------------------------------------------------------------ */
 
-const GLYPHS: Record<string, string[]> = {
+export const GLYPHS_5: Record<string, string[]> = {
   T: ['██████', '  ██  ', '  ██  ', '  ██  ', '  ██  '],
   O: [' ████ ', '██  ██', '██  ██', '██  ██', ' ████ '],
   P: ['█████ ', '██  ██', '█████ ', '██    ', '██    '],
@@ -97,7 +97,7 @@ export function wordmark(word: string, gap = 1): string[] {
   const letters = word
     .toUpperCase()
     .split('')
-    .map((c) => GLYPHS[c] ?? GLYPHS[' '])
+    .map((c) => GLYPHS_5[c] ?? GLYPHS_5[' '])
   const spacer = ' '.repeat(gap)
   return Array.from({ length: 5 }, (_, row) =>
     letters.map((g) => g[row]).join(spacer),
@@ -183,10 +183,11 @@ export function meter(ratio: number, width = 12, on = '█', off = '░'): strin
 
 /* --------------------------------------------------------------- motion -- */
 
-export const SPINNER = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏']
+/** Latin-only spinner: Geist Pixel carries no braille. */
+export const SPINNER = ['|', '/', '-', '\\']
 
 /** Deterministic scramble used by the text-decode effect. */
-const SCRAMBLE_POOL = '▚▞01!<>-_\\/[]{}—=+*^?#$&%'
+const SCRAMBLE_POOL = '01!<>-_\\/[]{}=+*^?#$&%'
 export function scramble(len: number, seed: number): string {
   let s = seed >>> 0
   let out = ''

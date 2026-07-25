@@ -6,10 +6,7 @@
    touches a column of numbers or a piece of character art (see --font-grid). */
 @import '@fontsource/geist-pixel/latin-400.css';
 
-@import '@fontsource-variable/jetbrains-mono/index.css';
-@import '@fontsource/ibm-plex-mono/400.css';
-@import '@fontsource/ibm-plex-mono/500.css';
-@import '@fontsource/ibm-plex-mono/600.css';
+
 
 /* =========================================================================
    TOPOKI — design tokens
@@ -47,17 +44,25 @@
   --color-alert: #ff2200;
 
   /* --- type system ---------------------------------------------------- */
-  /* The page face — prose, labels, buttons, names, headline figures. */
-  --font-pixel:
-    'Geist Pixel', 'JetBrains Mono Variable', ui-monospace, SFMono-Regular, Menlo,
-    monospace;
-  /* The data face — one advance width for every glyph, so columns of figures
-     line up and character art holds its grid. Geist Pixel can do neither. */
-  --font-grid:
-    'JetBrains Mono Variable', 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo,
-    Consolas, monospace;
-  --font-mono: var(--font-grid);
+  /* One face for the entire app. Geist Pixel is proportional and ships no
+     block or braille glyphs, so nothing in TOPOKI may depend on a character
+     grid: the mascot renders through <AsciiArt> (one fixed-width cell per
+     character, so any face holds), and every meter, sparkline, wordmark and
+     roofline is painted on canvas instead of typed. */
+  --font-pixel: 'Geist Pixel', ui-monospace, monospace;
+  --font-grid: var(--font-pixel);
+  --font-mono: var(--font-pixel);
   --font-display: var(--font-pixel);
+
+  /* Tokens the dither-kit components resolve against, mapped onto TOPOKI's
+     palette so their files stay byte-for-byte upstream. */
+  --color-foreground: #f5f5f0;
+  --color-muted-foreground: #9a9a94;
+  --color-popover: #0a0a0a;
+  --color-popover-foreground: #f5f5f0;
+  /* the kit rounds its corners; TOPOKI does not round anything */
+  --radius-md: 0px;
+  --radius-sm: 0px;
   /* GIWA sets its Korean copy in Pretendard. TOPOKI asks for it, then falls
      back to whatever Korean face the system already has — a couple of
      decorative lines are not worth a megabyte of webfont. */
@@ -258,12 +263,11 @@
   color: var(--color-smoke);
 }
 
-/* Any figure that shares a column with another figure — every table cell, the
-   price tape, the block counter. Pinned to the data face: Geist Pixel sets 1
-   narrower than 4, so a column of prices in it would come out ragged and the
-   ticking block height would jump on every digit. */
+/* Figures in a column. Geist Pixel has no tabular figures — it sets 1 narrower
+   than 4 — so digits cannot be made to sit on a shared grid. Columns are
+   right-aligned instead, which keeps the edge that actually reads, and anything
+   that ticks gets a fixed min-width so it cannot shift its neighbours. */
 @utility tnum {
-  font-family: var(--font-grid);
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum' on, 'zero' on;
 }
@@ -359,11 +363,9 @@
   }
 }
 
-/* Pre-formatted character art — the kitten, the wordmark, the roofline, the
-   meters, the sparklines. All of it needs one advance width per glyph, so all
-   of it sits on the data face. */
+/* Pre-formatted character art. Alignment comes from <AsciiArt>'s fixed cells,
+   not from the font. */
 @utility ascii {
-  font-family: var(--font-grid);
   white-space: pre;
   line-height: 1.06;
   letter-spacing: 0;
@@ -409,20 +411,9 @@ body {
   margin: 0 !important;
   background-color: #050505 !important;
   color: #f5f5f0 !important;
-  font-family:
-    'Geist Pixel', 'JetBrains Mono Variable', ui-monospace, SFMono-Regular, Menlo,
-    monospace !important;
+  font-family: 'Geist Pixel', ui-monospace, monospace !important;
   font-variant-ligatures: none !important;
   line-height: 1.5;
-}
-
-/* Columns of figures and character art have to survive the rule above too —
-   the pixel face cannot hold either. */
-body .tnum,
-body .ascii {
-  font-family:
-    'JetBrains Mono Variable', 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo,
-    Consolas, monospace !important;
 }
 
 /* Korean copy is the one exception, and it must survive the rule above. */

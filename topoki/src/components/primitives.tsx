@@ -10,6 +10,8 @@ import {
 } from 'react'
 import { SPINNER, monogram, scramble, symbolHash } from '../lib/ascii'
 import { cx } from '../lib/cx'
+import { Caret as PixelCaret } from './PixelArt'
+import { DitherButton } from './dither-kit/button'
 
 /* ------------------------------------------------------------------ panel --
    Every surface in TOPOKI is a hairline box with corner ticks and an
@@ -82,6 +84,31 @@ export function Button({
   children,
   ...rest
 }: ButtonProps) {
+  const shape = cx(
+    'relative inline-flex items-center justify-center gap-2 font-medium uppercase tracking-[0.14em] whitespace-nowrap',
+    size === 'sm' && 'h-7 px-2.5 text-2xs',
+    size === 'md' && 'h-9 px-3.5 text-xs',
+    size === 'lg' && 'h-13 px-5 text-sm',
+    block && 'w-full',
+  )
+
+  // The primary action is dither-kit's button, configured on the ember seed —
+  // its fill is the same ordered dither as the charts, and it densifies on
+  // hover and again on press.
+  if (variant === 'primary') {
+    return (
+      <DitherButton
+        {...rest}
+        color="ember"
+        variant="gradient"
+        bloom="low"
+        className={cx(shape, 'text-void', className)}
+      >
+        {children}
+      </DitherButton>
+    )
+  }
+
   return (
     <button
       {...rest}
@@ -92,8 +119,6 @@ export function Button({
         size === 'sm' && 'h-7 px-2.5 text-2xs',
         size === 'md' && 'h-9 px-3.5 text-xs',
         size === 'lg' && 'h-13 px-5 text-sm',
-        variant === 'primary' &&
-          'border-ember bg-ember text-void hover:bg-ember-soft hover:border-ember-soft disabled:bg-ink-2 disabled:text-smoke disabled:border-line',
         variant === 'outline' &&
           'border-line-2 bg-transparent text-bone hover:border-ember hover:text-ember',
         variant === 'ghost' &&
@@ -158,9 +183,10 @@ export function Delta({
       )}
     >
       {showGlyph && (
-        <span className={cx('text-[0.7em]', up && !flat && 'text-ember')}>
-          {flat ? '·' : up ? '▲' : '▼'}
-        </span>
+        <PixelCaret
+          dir={flat ? 'flat' : up ? 'up' : 'down'}
+          className={cx(up && !flat && 'text-ember')}
+        />
       )}
       {(up && !flat ? '+' : flat ? '' : '−') + Math.abs(value).toFixed(2) + '%'}
     </span>
@@ -201,7 +227,7 @@ export function Spinner({ className }: { className?: string }) {
 }
 
 export function Caret() {
-  return <span className="animate-blink text-ember">█</span>
+  return <span className="animate-blink inline-block h-[1em] w-[0.5em] bg-ember align-text-bottom" />
 }
 
 /* ------------------------------------------------------------- scramble --

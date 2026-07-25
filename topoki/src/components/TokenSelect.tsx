@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Modal } from './Modal'
+import { AsciiArt } from './PixelArt'
 import { Badge, TokenMark } from './primitives'
 import { TOKENS, token, type Token } from '../lib/market'
 import { amount as fmtAmount, price as fmtPrice, usd } from '../lib/format'
@@ -52,7 +53,7 @@ export function TokenSelect({
           />
           {q && (
             <button onClick={() => setQ('')} className="text-dust hover:text-ash">
-              ✕
+              x
             </button>
           )}
         </div>
@@ -87,9 +88,10 @@ export function TokenSelect({
         ))}
         {list.length === 0 && (
           <li className="p-8 text-center">
-            <pre className="ascii text-xs text-dust">
-              {'  /\\_/\\ \n ( -.- )\nno match'}
-            </pre>
+            <AsciiArt
+              lines={[' /\\_/\\ ', '( -.- )', 'no match']}
+              className="inline-block text-xs text-dust"
+            />
           </li>
         )}
       </ul>

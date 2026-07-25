@@ -79,7 +79,7 @@ export function Header() {
               onClick={() => setMenuOpen((v) => !v)}
               aria-label="Menu"
             >
-              {menuOpen ? '✕' : '≡'}
+              {menuOpen ? 'x' : '='}
             </button>
           </div>
         </div>
@@ -238,7 +238,7 @@ function ConnectRow({
         <span className="block text-sm text-bone">{name}</span>
         <span className="block text-2xs text-smoke">{hint}</span>
       </span>
-      <span className="text-ember">→</span>
+      <span className="text-ember">-&gt;</span>
     </button>
   )
 }

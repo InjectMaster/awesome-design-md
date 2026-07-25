@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import { CAT_SIT, GIWA_PROVERB, wordmark } from '../lib/ascii'
+import { CAT_SIT, GIWA_PROVERB } from '../lib/ascii'
+import { AsciiArt, PixelWordmark } from './PixelArt'
 import { DEFAULT_CHAIN } from '../lib/chain'
 import { STATS } from '../lib/market'
 import { cx } from '../lib/cx'
@@ -60,12 +61,8 @@ export function BootScreen({ onDone }: { onDone: () => void }) {
     >
       <div className="bg-scanlines pointer-events-none absolute inset-0" />
       <div className="animate-flicker flex flex-col items-center">
-        <pre className="ascii text-[10px] leading-[1.05] text-ember sm:text-xs">
-          {CAT_SIT.join('\n')}
-        </pre>
-        <pre className="ascii mt-5 text-[5px] leading-[1.05] text-bone sm:text-[8px]">
-          {wordmark('TOPOKI').join('\n')}
-        </pre>
+        <AsciiArt lines={CAT_SIT} className="text-[11px] text-ember sm:text-sm" />
+        <PixelWordmark className="mt-6 w-[180px] sm:w-[240px]" scale={4} />
       </div>
 
       <div className="mt-8 h-28 w-[300px] sm:w-[420px]">
@@ -78,7 +75,9 @@ export function BootScreen({ onDone }: { onDone: () => void }) {
             <span className={cx(i === LINES.length - 1 && 'text-ember')}>{l}</span>
           </div>
         ))}
-        {step <= LINES.length && <span className="animate-blink text-ember">█</span>}
+        {step <= LINES.length && (
+          <span className="animate-blink inline-block h-3 w-1.5 bg-ember" />
+        )}
       </div>
 
       <p className="kr absolute bottom-16 max-w-md px-6 text-center text-2xs leading-relaxed text-dust">

@@ -13,6 +13,7 @@ import {
 import { cx } from '../lib/cx'
 import { Spark } from '../components/charts'
 import { DitherChart } from '../components/DitherChart'
+import { DitherBar } from '../components/DitherBar'
 import { Modal } from '../components/Modal'
 import { TokenSelect } from '../components/TokenSelect'
 import { useWallet } from '../lib/wallet'
@@ -25,7 +26,6 @@ import {
   token,
   type Quote,
 } from '../lib/market'
-import { meter } from '../lib/ascii'
 import { ago, amount as fmtAmount, truncAddress, usd } from '../lib/format'
 import { DEFAULT_CHAIN, txUrl } from '../lib/chain'
 
@@ -117,7 +117,7 @@ export function SwapPage() {
                 title="Transaction settings"
               >
                 <span className="tnum">{(slippage / 100).toFixed(2)}%</span>
-                <span>⚙</span>
+                <span className="tracking-tighter">[=]</span>
               </button>
             </>
           }
@@ -149,7 +149,7 @@ export function SwapPage() {
                   flipping && 'rotate-180 text-ember',
                 )}
               >
-                ⇅
+                <span className="text-[13px] leading-none">v^</span>
               </button>
             </div>
 
@@ -171,7 +171,7 @@ export function SwapPage() {
               className="flex w-full items-center justify-between text-xs text-ash"
             >
               <span className="flex items-center gap-2 text-smoke">
-                <span className="text-ember">≈</span> Rate
+                <span className="text-ember">~</span> Rate
               </span>
               <span className="tnum text-bone">
                 {inverted
@@ -187,16 +187,11 @@ export function SwapPage() {
                   tone={q.priceImpact > 3 ? 'warn' : 'default'}
                   v={
                     <span className="flex items-center gap-2">
-                      <span className="ascii text-[10px] leading-none">
-                        <span className="text-ember">
-                          {meter(Math.min(1, q.priceImpact / 10), 8, '█', '')}
-                        </span>
-                        <span className="text-line">
-                          {'█'.repeat(
-                            8 - Math.round(Math.min(1, q.priceImpact / 10) * 8),
-                          )}
-                        </span>
-                      </span>
+                      <DitherBar
+                        ratio={Math.min(1, q.priceImpact / 10)}
+                        height={8}
+                        className="w-12"
+                      />
                       {q.priceImpact.toFixed(2)}%
                     </span>
                   }
@@ -222,7 +217,7 @@ export function SwapPage() {
 
           {q.ok && q.priceImpact > 5 && (
             <div className="bg-hatch mt-3 flex items-start gap-2 border border-ember/40 p-2.5 text-2xs text-ember">
-              <span>▲</span>
+              <span>!</span>
               <span>
                 High price impact ({q.priceImpact.toFixed(2)}%). This trade moves the pool
                 against you — consider splitting it.
@@ -401,7 +396,7 @@ function Field({
         >
           <TokenMark symbol={symbol} />
           <span className="text-sm tracking-[0.08em] text-bone">{symbol}</span>
-          <span className="text-dust transition-colors group-hover:text-ember">▾</span>
+          <span className="text-dust transition-colors group-hover:text-ember">v</span>
         </button>
       </div>
 
@@ -433,7 +428,7 @@ function RouteDiagram({ quote }: { quote: Quote }) {
                 <span className="text-2xs text-dust">
                   {quote.route[i].pool.feeBps / 100}%
                 </span>
-                <span className="ascii text-ember">──▶</span>
+                <span className="text-ember">--&gt;</span>
               </span>
             )}
           </span>
@@ -464,7 +459,7 @@ function PoolCard({ from, to }: { from: string; to: string }) {
   ]
 
   return (
-    <Panel title="Pool" actions={<Spark series={pool.series} width={14} />}>
+    <Panel title="Pool" actions={<Spark series={pool.series} />}>
       <div className="grid grid-cols-2 gap-y-3">
         <Metric label="TVL" value={usd(pool.tvl, { compact: true })} />
         <Metric label="Volume 24H" value={usd(pool.volume24h, { compact: true })} />
@@ -701,7 +696,7 @@ function ConfirmModal({
                   <span className="block text-2xs text-smoke">{from}</span>
                 </span>
               </span>
-              <span className="text-ember">──▶</span>
+              <span className="text-ember">--&gt;</span>
               <span className="flex items-center gap-2">
                 <span className="text-right">
                   <span className="tnum block text-lg text-bone">
@@ -765,7 +760,7 @@ function ConfirmModal({
                 variant="outline"
                 onClick={() => window.open(txUrl(DEFAULT_CHAIN, hash), '_blank')}
               >
-                Explorer ↗
+                Explorer &gt;
               </Button>
               <Button block variant="primary" onClick={onClose}>
                 Done

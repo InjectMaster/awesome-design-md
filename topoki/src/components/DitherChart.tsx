@@ -12,6 +12,10 @@ import {
   type Variant,
 } from '../lib/dither'
 import { price as fmtPrice } from '../lib/format'
+import { CommonChartContext, type CommonChart } from './dither-kit/common-context'
+import { PALETTE } from './dither-kit/palette'
+import { Tooltip } from './dither-kit/tooltip'
+import { Legend } from './dither-kit/legend'
 
 /* =========================================================================
    DitherChart — the price surface.
@@ -43,6 +47,8 @@ export function DitherChart({
   interactive = true,
   label,
   format = fmtPrice,
+  seriesName = 'Price',
+  legend = false,
   className,
 }: {
   series: number[]
@@ -55,6 +61,9 @@ export function DitherChart({
   interactive?: boolean
   label?: string
   format?: (n: number) => string
+  /** legend / tooltip row name for this series */
+  seriesName?: string
+  legend?: boolean
   className?: string
 }) {
   const wrap = useRef<HTMLDivElement>(null)
@@ -145,6 +154,50 @@ export function DitherChart({
   const bloomStyle = bloomLayerStyle(bloom, true)
 
   const cols = box.w ? backingSize(box.w, box.h).cols : 1
+
+  // dither-kit's Tooltip and Legend read this context, so they drop straight
+  // in — this chart just has to publish the same surface a kit root does.
+  const seed = tone === 'ember' ? PALETTE.ember : PALETTE.ash
+  const dataIndex =
+    hover === null
+      ? null
+      : Math.min(
+          series.length - 1,
+          Math.round((hover / Math.max(1, cols - 1)) * (series.length - 1)),
+        )
+  const common: CommonChart = useMemo(
+    () => ({
+      names: [seriesName],
+      labelOf: () => seriesName,
+      seedOf: () => seed,
+      selectedDataKey: null,
+      selectDataKey: () => {},
+      focusDataKey: null,
+      setFocusDataKey: () => {},
+      hoverIndex: dataIndex,
+      heading: (i) => {
+        // the series is 168 hourly closes, so an index is an hour offset
+        const hoursAgo = series.length - 1 - i
+        return hoursAgo === 0 ? 'now' : `${hoursAgo}h ago`
+      },
+      itemsAt: (i) => [
+        {
+          name: seriesName,
+          label: seriesName,
+          value: series[i] ?? 0,
+          seed,
+          dimmed: false,
+        },
+      ],
+      ready: box.w > 0,
+      tooltipLeft: hover === null ? 0 : (hover / Math.max(1, cols - 1)) * box.w,
+      tooltipTop:
+        dataIndex === null
+          ? 0
+          : (1 - ((series[dataIndex] - min) / (max - min || 1)) * 0.94) * box.h,
+    }),
+    [seriesName, seed, dataIndex, series, box, hover, cols, min, max],
+  )
   const hoverValue =
     hover === null
       ? null
@@ -156,6 +209,7 @@ export function DitherChart({
         ]
 
   return (
+    <CommonChartContext.Provider value={common}>
     <div className={className}>
       <div
         ref={wrap}
@@ -189,6 +243,10 @@ export function DitherChart({
             style={bloomStyle}
           />
         )}
+
+        {/* dither-kit's own gliding tooltip + legend */}
+        <Tooltip valueFormatter={(v) => format(v)} variant="frosted-glass" />
+        {legend && <Legend align="left" />}
       </div>
 
       <div className="mt-1.5 flex items-center justify-between">
@@ -205,5 +263,6 @@ export function DitherChart({
         </span>
       </div>
     </div>
+    </CommonChartContext.Provider>
   )
 }

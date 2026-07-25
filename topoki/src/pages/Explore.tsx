@@ -14,6 +14,7 @@ import { cx } from '../lib/cx'
 import { Spark } from '../components/charts'
 import { DitherChart } from '../components/DitherChart'
 import { Modal } from '../components/Modal'
+import { AsciiArt } from '../components/PixelArt'
 import {
   POOLS,
   STATS,
@@ -190,7 +191,7 @@ function GlobalStats() {
           className="mt-4 flex items-center justify-between border border-line bg-ink-2 px-3 py-2 text-xs text-ash transition-colors hover:border-ember/60 hover:text-ember"
         >
           {DEFAULT_CHAIN.explorerName}
-          <span>↗</span>
+          <span>&gt;</span>
         </a>
       </Panel>
     </div>
@@ -253,7 +254,7 @@ function SortHead({
       >
         {children}
         <span className={cx('text-[8px]', !active && 'text-dust')}>
-          {active ? (dir === 1 ? '▲' : '▼') : '·'}
+          {active ? (dir === 1 ? '^' : 'v') : '.'}
         </span>
       </button>
     </th>
@@ -357,7 +358,7 @@ function TokensTable({
                 {usd(t.fdv, { compact: true })}
               </td>
               <td className="px-3 py-2.5 text-right">
-                <Spark series={t.series} width={20} />
+                <Spark series={t.series} />
               </td>
             </tr>
           ))}
@@ -455,7 +456,7 @@ function PoolsTable({ query }: { query: string }) {
                 {p.apr.toFixed(2)}%
               </td>
               <td className="px-3 py-2.5 text-right">
-                <Spark series={p.series} width={16} />
+                <Spark series={p.series} />
               </td>
             </tr>
           ))}
@@ -521,7 +522,7 @@ function TxTable({ query }: { query: string }) {
                 <span className="tnum">
                   {fmtAmount(t.amountIn, 4)} <span className="text-bone">{t.from}</span>
                   {/* a swap moves value across; liquidity moves both sides at once */}
-                  <span className="px-1.5 text-dust">{t.kind === 'swap' ? '→' : '+'}</span>
+                  <span className="px-1.5 text-dust">{t.kind === 'swap' ? '-&gt;' : '+'}</span>
                   {fmtAmount(t.amountOut, 4)} <span className="text-bone">{t.to}</span>
                 </span>
               </td>
@@ -545,7 +546,7 @@ function TxTable({ query }: { query: string }) {
                   rel="noreferrer noopener"
                   className="text-dust transition-colors hover:text-ember"
                 >
-                  {truncAddress(t.hash, 8, 4)} ↗
+                  {truncAddress(t.hash, 8, 4)}&nbsp;&gt;
                 </a>
               </td>
               <td className="tnum px-3 py-2.5 text-right text-smoke">
@@ -563,7 +564,7 @@ function TxTable({ query }: { query: string }) {
 function Empty() {
   return (
     <div className="flex flex-col items-center gap-3 py-14">
-      <pre className="ascii text-xs text-dust">{CAT_SLEEP.join('\n')}</pre>
+      <AsciiArt lines={CAT_SLEEP} className="text-xs text-dust" />
       <p className="text-xs text-smoke">Nothing here. Try another search.</p>
     </div>
   )
@@ -647,7 +648,7 @@ function TokenDetail({ symbol, onClose }: { symbol: string | null; onClose: () =
               rel="noreferrer noopener"
               className="tnum border border-line px-3 py-2 text-2xs text-smoke transition-colors hover:border-ember/60 hover:text-ember"
             >
-              {truncAddress(t.address, 10, 8)} ↗
+              {truncAddress(t.address, 10, 8)}&nbsp;&gt;
             </a>
           </div>
         </div>

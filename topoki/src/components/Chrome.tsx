@@ -1,10 +1,10 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { TOKENS } from '../lib/market'
-import { roofline } from '../lib/ascii'
 import { clockUTC, price as fmtPrice } from '../lib/format'
 import { DEFAULT_CHAIN } from '../lib/chain'
 import { cx } from '../lib/cx'
+import { Caret, PixelRoofline, VRule } from './PixelArt'
 
 /* --------------------------------------------------------------- backdrop --
    Four stacked layers: engineering grid, dot matrix, scanlines and an ember
@@ -23,26 +23,8 @@ export function Backdrop() {
       />
       <div className="absolute inset-0 bg-[radial-gradient(120%_90%_at_50%_0%,transparent_45%,#050505_100%)]" />
       {/* the roofline sits above the vignette, otherwise it is swallowed by it */}
-      <Roofline />
+      <PixelRoofline className="absolute inset-x-0 bottom-9 opacity-80" />
     </div>
-  )
-}
-
-/** 기와 — the hanok roofline, drawn in characters along the bottom edge. */
-function Roofline() {
-  const [cols, setCols] = useState(220)
-
-  useEffect(() => {
-    const measure = () => setCols(Math.ceil(window.innerWidth / 6.2))
-    measure()
-    window.addEventListener('resize', measure)
-    return () => window.removeEventListener('resize', measure)
-  }, [])
-
-  return (
-    <pre className="ascii absolute inset-x-0 bottom-9 text-[10px] leading-[1.15] text-line-3 opacity-80 sm:text-[11px]">
-      {roofline(cols).join('\n')}
-    </pre>
   )
 }
 
@@ -68,8 +50,13 @@ export function Ticker() {
         <span key={t.symbol} className="flex items-center gap-2 px-4 text-2xs">
           <span className="tracking-[0.16em] text-ash">{t.symbol}</span>
           <span className="tnum text-bone">{t.price}</span>
-          <span className={cx('tnum', t.change >= 0 ? 'text-ember' : 'text-smoke')}>
-            {t.change >= 0 ? '▲' : '▼'}
+          <span
+            className={cx(
+              'tnum flex items-center gap-1',
+              t.change >= 0 ? 'text-ember' : 'text-smoke',
+            )}
+          >
+            <Caret dir={t.change >= 0 ? 'up' : 'down'} />
             {Math.abs(t.change).toFixed(2)}%
           </span>
           <span className="pl-2 text-dust">/</span>
@@ -136,7 +123,7 @@ export function StatusBar() {
               rel="noreferrer noopener"
               className="text-smoke transition-colors hover:text-ember"
             >
-              FAUCET ↗
+              FAUCET&nbsp;&gt;
             </a>
           )}
           <a
@@ -145,7 +132,7 @@ export function StatusBar() {
             rel="noreferrer noopener"
             className="text-smoke transition-colors hover:text-ember"
           >
-            EXPLORER ↗
+            EXPLORER&nbsp;&gt;
           </a>
           <span className="hidden text-dust sm:inline">v0.1.0 · DEMO DATA</span>
         </span>
@@ -164,5 +151,5 @@ function Field({ k, v }: { k: string; v: string }) {
 }
 
 function Sep() {
-  return <span className="text-line-2">│</span>
+  return <VRule />
 }

@@ -4,6 +4,7 @@ import { Backdrop, StatusBar, Ticker } from './components/Chrome'
 import { Header } from './components/Header'
 import { BootScreen } from './components/BootScreen'
 import { Button } from './components/primitives'
+import { AsciiArt } from './components/PixelArt'
 import { SwapPage } from './pages/Swap'
 import { ExplorePage } from './pages/Explore'
 import { PortfolioPage } from './pages/Portfolio'
@@ -56,7 +57,7 @@ function ScrollTop() {
 function NotFound() {
   return (
     <div className="mx-auto flex max-w-lg flex-col items-center px-4 py-24 text-center">
-      <pre className="ascii text-xs text-ember sm:text-sm">{CAT_ALERT.join('\n')}</pre>
+      <AsciiArt lines={CAT_ALERT} className="text-sm text-ember" />
       <h1 className="mt-8 text-2xl tracking-[0.3em] text-bone">404</h1>
       <p className="mt-3 text-xs text-smoke">
         This route does not exist on TOPOKI.
