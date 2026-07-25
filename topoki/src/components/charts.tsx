@@ -32,7 +32,7 @@ export function Spark({
     <span
       aria-hidden
       className={cx(
-        'ascii-grid text-[13px] leading-none',
+        'ascii text-[13px] leading-none',
         up ? 'text-ember/90' : 'text-smoke',
         className,
       )}

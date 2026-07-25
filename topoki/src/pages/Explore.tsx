@@ -588,7 +588,7 @@ function TokenDetail({ symbol, onClose }: { symbol: string | null; onClose: () =
             <div className="flex items-center gap-3">
               <TokenMark symbol={t.symbol} size="lg" />
               <div>
-                <div className="tnum text-3xl leading-none text-bone">
+                <div className="figure text-3xl leading-none text-bone">
                   {fmtPrice(t.price)}
                 </div>
                 <Delta value={t.change24h} className="mt-1.5 text-xs" />

@@ -59,10 +59,29 @@ system and the one that makes the whole thing look composed rather than crypto.
 
 ## 3. Type
 
-- **Everything is `JetBrains Mono`** (variable), falling back to `IBM Plex Mono`,
-  then `ui-monospace`. Ligatures off, `zero` and `tnum` on.
-- **Korean copy only** is set in **Pretendard** — the face GIWA itself uses.
-- Numbers always use tabular figures. A column of digits must never reflow.
+Two faces, split by job — not by taste.
+
+- **`Geist Pixel`** is the page face: prose, labels, buttons, token names, and any
+  headline figure that stands on its own (net worth, mid price, the swap amounts).
+  A pixel display face with a big x-height, so it holds up at 10px.
+- **`JetBrains Mono`** is the data face: every figure that shares a column with
+  another figure, and every piece of character art. Geist Pixel is proportional
+  and ships no tabular figures — it sets `1` narrower than `4`, so a column of
+  prices in it comes out ragged and a ticking counter jumps on each digit. It also
+  covers no block, box-drawing or braille glyphs, which is the entire alphabet the
+  art is drawn from.
+- **Korean copy** is set in **Pretendard** — the face GIWA itself uses.
+
+Three utilities carry the split, and nothing else should set a family:
+
+| Utility | Face | For |
+|---|---|---|
+| *(default)* | Geist Pixel | all prose, labels, buttons |
+| `figure` | Geist Pixel | a headline number with nothing to line up against |
+| `tnum` | JetBrains Mono | any number in a column, and anything that ticks |
+| `ascii` | JetBrains Mono | character art — mascot, wordmark, roofline, meters |
+
+A column of digits must never reflow. That rule outranks the choice of face.
 
 | Role | Spec |
 |---|---|
@@ -104,10 +123,15 @@ This is what makes it TOPOKI rather than another dark DEX.
   no-results.
 - **Wordmark.** A 5-row block face (`█`) assembled at runtime from a glyph table, so
   columns can never drift.
-- **Charts.** Price history is plotted into **braille characters** — each cell carries
-  2×4 dots, so an 80×12 block of text is a 160×48 pixel plot. It is a real chart that
-  happens to be selectable text. Table sparklines are single-row braille; allocation
-  bars and meters are `█` runs against a `line`-coloured remainder.
+- **Charts.** Price history is **ordered-dithered** on a low-resolution canvas
+  scaled up `pixelated`: a 4×4 Bayer matrix decides each 2px cell, dense at the
+  floor and dissolving upward toward the value line, with a blurred additive copy
+  behind it for the ember bloom. Fill strength is held at 0.6 — at full strength
+  the floor goes solid and one chart spends the page's whole ember budget.
+  Allocation meters run the same matrix at constant vertical density, dissolving
+  toward the tip. Engine vendored from dither-kit (MIT); see `lib/dither.ts`.
+- **Sparklines.** Dense table rows keep single-row **braille** plots — 2×4 dots per
+  character, selectable text, and legible at 13px where a 2px dither cell is mush.
 - **Roofline.** A 기와 roof drawn in `▁ █ ╱‾╲ │` runs edge-to-edge along the bottom of
   the viewport at low opacity. This is the direct quote from GIWA's own brand texture.
 - **Token marks.** No logo images. Each token is a two-letter monogram in a hairline

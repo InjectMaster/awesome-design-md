@@ -1,10 +1,10 @@
 @import 'tailwindcss';
 
-/* DotGothic16 — a 16-dot bitmap gothic. The page face: every label, figure
-   and table cell is set in it. Latin subset only (10 kB): its box-drawing and
-   block glyphs are full-width, and it has no braille at all, so the character
-   art keeps a true half-width grid font underneath (see --font-grid). */
-@import '@fontsource/dotgothic16/latin-400.css';
+/* Geist Pixel — the page face. A pixel display face with a big x-height, so
+   labels and headline figures read at small sizes. It is proportional, ships
+   no tabular figures, and covers no block or braille glyphs, so it never
+   touches a column of numbers or a piece of character art (see --font-grid). */
+@import '@fontsource/geist-pixel/latin-400.css';
 
 @import '@fontsource-variable/jetbrains-mono/index.css';
 @import '@fontsource/ibm-plex-mono/400.css';
@@ -47,15 +47,17 @@
   --color-alert: #ff2200;
 
   /* --- type system ---------------------------------------------------- */
-  --font-mono:
-    'DotGothic16', 'JetBrains Mono Variable', 'IBM Plex Mono', ui-monospace,
-    SFMono-Regular, Menlo, Consolas, monospace;
-  /* The grid face, for art that mixes letters with block and braille glyphs:
-     one advance width across every character DotGothic16 splits or lacks. */
+  /* The page face — prose, labels, buttons, names, headline figures. */
+  --font-pixel:
+    'Geist Pixel', 'JetBrains Mono Variable', ui-monospace, SFMono-Regular, Menlo,
+    monospace;
+  /* The data face — one advance width for every glyph, so columns of figures
+     line up and character art holds its grid. Geist Pixel can do neither. */
   --font-grid:
     'JetBrains Mono Variable', 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo,
     Consolas, monospace;
-  --font-display: 'DotGothic16', 'JetBrains Mono Variable', ui-monospace, monospace;
+  --font-mono: var(--font-grid);
+  --font-display: var(--font-pixel);
   /* GIWA sets its Korean copy in Pretendard. TOPOKI asks for it, then falls
      back to whatever Korean face the system already has — a couple of
      decorative lines are not worth a megabyte of webfont. */
@@ -256,10 +258,21 @@
   color: var(--color-smoke);
 }
 
-/* Tabular figures for every number in the app. */
+/* Any figure that shares a column with another figure — every table cell, the
+   price tape, the block counter. Pinned to the data face: Geist Pixel sets 1
+   narrower than 4, so a column of prices in it would come out ragged and the
+   ticking block height would jump on every digit. */
 @utility tnum {
+  font-family: var(--font-grid);
   font-variant-numeric: tabular-nums;
   font-feature-settings: 'tnum' on, 'zero' on;
+}
+
+/* A headline figure standing on its own — net worth, mid price, the swap
+   amounts. Nothing to line up with, so it gets the pixel face. */
+@utility figure {
+  font-family: var(--font-pixel);
+  font-variant-numeric: tabular-nums;
 }
 
 /* Dot-matrix field, the base texture of the app. */
@@ -346,21 +359,11 @@
   }
 }
 
-/* Pre-formatted character art. Pure-Latin art (the kitten) reads best in the
-   dot face, so this inherits the page font. */
+/* Pre-formatted character art — the kitten, the wordmark, the roofline, the
+   meters, the sparklines. All of it needs one advance width per glyph, so all
+   of it sits on the data face. */
 @utility ascii {
-  font-family: var(--font-mono);
-  white-space: pre;
-  line-height: 1.06;
-  letter-spacing: 0;
-  font-variant-ligatures: none;
-}
-
-/* Art that mixes letters with block, box-drawing or braille glyphs — the
-   wordmark, the roofline, the meters, the sparklines. Pinned to the grid face
-   so every glyph on the line shares one advance width. */
-@utility ascii-grid {
-  font-family: var(--font-grid) !important;
+  font-family: var(--font-grid);
   white-space: pre;
   line-height: 1.06;
   letter-spacing: 0;
@@ -406,16 +409,17 @@ body {
   margin: 0 !important;
   background-color: #050505 !important;
   color: #f5f5f0 !important;
-  /* every glyph in TOPOKI sits on the character grid, digits included */
   font-family:
-    'DotGothic16', 'JetBrains Mono Variable', 'IBM Plex Mono', ui-monospace,
-    SFMono-Regular, Menlo, Consolas, monospace !important;
+    'Geist Pixel', 'JetBrains Mono Variable', ui-monospace, SFMono-Regular, Menlo,
+    monospace !important;
   font-variant-ligatures: none !important;
   line-height: 1.5;
 }
 
-/* Character art on the grid face has to survive the rule above too. */
-body .ascii-grid {
+/* Columns of figures and character art have to survive the rule above too —
+   the pixel face cannot hold either. */
+body .tnum,
+body .ascii {
   font-family:
     'JetBrains Mono Variable', 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo,
     Consolas, monospace !important;

@@ -187,7 +187,7 @@ export function SwapPage() {
                   tone={q.priceImpact > 3 ? 'warn' : 'default'}
                   v={
                     <span className="flex items-center gap-2">
-                      <span className="ascii-grid text-[10px] leading-none">
+                      <span className="ascii text-[10px] leading-none">
                         <span className="text-ember">
                           {meter(Math.min(1, q.priceImpact / 10), 8, '█', '')}
                         </span>
@@ -265,7 +265,7 @@ export function SwapPage() {
             <div>
               <div className="label mb-1">Mid price</div>
               <div className="tnum flex items-baseline gap-3">
-                <span className="text-2xl text-bone sm:text-3xl">
+                <span className="figure text-2xl text-bone sm:text-3xl">
                   {fmtAmount(tokenFrom.price / tokenTo.price, 6)}
                 </span>
                 <span className="text-xs text-smoke">
@@ -391,7 +391,7 @@ function Field({
           }}
           placeholder="0"
           className={cx(
-            'tnum w-full min-w-0 bg-transparent text-2xl outline-none sm:text-[28px]',
+            'figure w-full min-w-0 bg-transparent text-2xl outline-none sm:text-[28px]',
             readOnly ? 'text-ash' : 'text-bone',
           )}
         />

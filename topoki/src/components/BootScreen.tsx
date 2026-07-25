@@ -63,7 +63,7 @@ export function BootScreen({ onDone }: { onDone: () => void }) {
         <pre className="ascii text-[10px] leading-[1.05] text-ember sm:text-xs">
           {CAT_SIT.join('\n')}
         </pre>
-        <pre className="ascii-grid mt-5 text-[5px] leading-[1.05] text-bone sm:text-[8px]">
+        <pre className="ascii mt-5 text-[5px] leading-[1.05] text-bone sm:text-[8px]">
           {wordmark('TOPOKI').join('\n')}
         </pre>
       </div>

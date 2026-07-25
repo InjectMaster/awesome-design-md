@@ -68,7 +68,7 @@ export function PortfolioPage() {
         >
           <div className="flex flex-wrap items-end gap-x-8 gap-y-3">
             <div>
-              <div className="tnum text-4xl leading-none text-bone sm:text-5xl">
+              <div className="figure text-4xl leading-none text-bone sm:text-5xl">
                 <Scramble text={usd(total)} duration={700} />
               </div>
               <div className="mt-2 flex items-center gap-3">
@@ -281,7 +281,7 @@ function Positions() {
 
             <div className="mt-4">
               <div className="label mb-1.5">Range</div>
-              <div className="ascii-grid text-[11px] leading-none">
+              <div className="ascii text-[11px] leading-none">
                 <span className="text-line-2">{meter(ratio, 24, '─', '─')}</span>
               </div>
               <div className="relative -mt-[7px] h-3">
