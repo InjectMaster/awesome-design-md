@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import { cx } from '../lib/cx'
 import { GLYPHS_5 } from '../lib/ascii'
 import { SEEDS, rgb } from '../lib/dither'
+import { backingSize, paintColumn, resample } from './dither-kit/dither-paint'
+import { PALETTE } from './dither-kit/palette'
 
 /* =========================================================================
    PixelArt — character art that does not depend on the font.
@@ -200,8 +202,7 @@ export function PixelSpark({
   useEffect(() => {
     const c = ref.current
     if (!c || series.length === 0) return
-    const cols = Math.round(width / 2)
-    const rows = Math.round(height / 2)
+    const { cols, rows } = backingSize(width, height)
     c.width = cols
     c.height = rows
     const ctx = c.getContext('2d')
@@ -211,19 +212,20 @@ export function PixelSpark({
     const min = Math.min(...series)
     const max = Math.max(...series)
     const span = max - min || 1
-    const seed = up ? SEEDS.ember : SEEDS.ash
+    const seed = up ? PALETTE.ember : PALETTE.grey
 
+    // same ordered-dither column fill as the big charts, just two cells tall
+    const fractions = resample(
+      series.map((v) => (v - min) / span),
+      cols,
+    )
     for (let x = 0; x < cols; x++) {
-      const t = (x / Math.max(1, cols - 1)) * (series.length - 1)
-      const i = Math.floor(t)
-      const v =
-        series[i] + (series[Math.min(i + 1, series.length - 1)] - series[i]) * (t - i)
-      const y = Math.round((1 - (v - min) / span) * (rows - 1))
-      ctx.fillStyle = rgb(seed.fill, 1, 0.9)
-      ctx.fillRect(x, y, 1, 1)
-      // a one-pixel shadow under the line keeps a flat series visible
-      ctx.fillStyle = rgb(seed.fill, 1, 0.22)
-      ctx.fillRect(x, Math.min(rows - 1, y + 1), 1, 1)
+      paintColumn(ctx, x, (1 - fractions[x] * 0.9) * (rows - 1), rows, seed, {
+        variant: 'gradient',
+        intensity: 0,
+        dim: 0.9,
+        stacked: false,
+      })
     }
   }, [series, width, height, up])
 

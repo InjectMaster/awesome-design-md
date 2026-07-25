@@ -8,7 +8,17 @@
 
 export type Rgb = [number, number, number]
 
-export type DitherColor = "orange" | "ember" | "grey" | "ash" | "bone"
+export type DitherColor =
+  | "orange"
+  | "ember"
+  | "green"
+  | "blue"
+  | "purple"
+  | "pink"
+  | "red"
+  | "grey"
+  | "ash"
+  | "bone"
 
 export type Seed = { fill: Rgb; line: Rgb; star: Rgb }
 
@@ -31,10 +41,29 @@ const BONE: Seed = {
 export const PALETTE: Record<DitherColor, Seed> = {
   orange: EMBER,
   ember: EMBER,
+  // upstream's hues, kept for charts that must separate many series by colour
+  // (the allocation ring). Everything else in TOPOKI still runs on ember alone.
+  green: { fill: [40, 210, 110], line: [150, 255, 180], star: [200, 255, 220] },
+  blue: { fill: [53, 143, 243], line: [150, 200, 255], star: [205, 228, 255] },
+  purple: { fill: [150, 110, 255], line: [200, 175, 255], star: [225, 210, 255] },
+  pink: { fill: [240, 90, 190], line: [255, 170, 220], star: [255, 205, 235] },
+  red: { fill: [240, 70, 70], line: [255, 150, 140], star: [255, 195, 185] },
   grey: ASH,
   ash: ASH,
   bone: BONE,
 }
+
+/** Slice order for multi-series charts — ember first, so the accent still leads. */
+export const SERIES_COLORS: DitherColor[] = [
+  "ember",
+  "blue",
+  "green",
+  "purple",
+  "pink",
+  "red",
+  "orange",
+  "grey",
+]
 
 export const rgb = ([r, g, b]: Rgb, k = 1, a = 1) =>
   `rgba(${Math.round(r * k)},${Math.round(g * k)},${Math.round(b * k)},${a})`

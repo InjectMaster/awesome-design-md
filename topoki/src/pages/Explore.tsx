@@ -5,7 +5,6 @@ import {
   Button,
   Delta,
   Panel,
-  Rule,
   Tab,
   Tabs,
   TokenMark,
@@ -140,40 +139,56 @@ export function ExplorePage() {
 /* ----------------------------------------------------------- global stats -- */
 
 function GlobalStats() {
+  // TVL is the pools' own series; volume and fees ride on it at their own
+  // scale, so the three lines share a shape but not a magnitude.
   const tvlSeries = useMemo(
-    () =>
-      POOLS[0].series.map((_, i) =>
-        POOLS.reduce((sum, p) => sum + p.series[i], 0),
-      ),
+    () => POOLS[0].series.map((_, i) => POOLS.reduce((sum, p) => sum + p.series[i], 0)),
     [],
   )
+  const volSeries = useMemo(
+    () =>
+      tvlSeries.map((v, i) => v * (0.9 + 0.35 * Math.sin(i / 7)) * (STATS.volume24h / STATS.tvl)),
+    [tvlSeries],
+  )
+  const feeSeries = useMemo(
+    () => volSeries.map((v) => v * (STATS.fees24h / STATS.volume24h)),
+    [volSeries],
+  )
+
+  const cards: { label: string; value: string; delta: number; series: number[] }[] = [
+    { label: 'TVL', value: usd(STATS.tvl, { compact: true }), delta: 2.41, series: tvlSeries },
+    {
+      label: 'Volume 24H',
+      value: usd(STATS.volume24h, { compact: true }),
+      delta: -4.12,
+      series: volSeries,
+    },
+    {
+      label: 'Fees 24H',
+      value: usd(STATS.fees24h, { compact: true }),
+      delta: 1.08,
+      series: feeSeries,
+    },
+  ]
 
   return (
-    <div className="grid gap-4 lg:grid-cols-3">
-      <Panel title="Protocol" className="lg:col-span-2" tone="raised">
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-          <BigStat label="TVL" value={usd(STATS.tvl, { compact: true })} delta={2.41} />
-          <BigStat
-            label="Volume 24H"
-            value={usd(STATS.volume24h, { compact: true })}
-            delta={-4.12}
+    <div className="grid gap-4 lg:grid-cols-4">
+      {cards.map((c) => (
+        <Panel key={c.label} title={c.label} tone="raised">
+          <div className="mb-3 flex items-baseline justify-between gap-2">
+            <span className="figure text-xl leading-none text-bone">{c.value}</span>
+            <Delta value={c.delta} className="text-2xs" />
+          </div>
+          <DitherChart
+            series={c.series}
+            height={104}
+            bloom="low"
+            label={`${c.label} · 168H`}
+            seriesName={c.label}
+            format={(n) => usd(n, { compact: true })}
           />
-          <BigStat
-            label="Fees 24H"
-            value={usd(STATS.fees24h, { compact: true })}
-            delta={1.08}
-          />
-          <BigStat label="Pools" value={String(STATS.pools)} />
-        </div>
-        <Rule className="my-4" />
-        <DitherChart
-          series={tvlSeries}
-          height={116}
-          bloom="low"
-          label="TVL · 168H"
-          format={(n) => usd(n, { compact: true })}
-        />
-      </Panel>
+        </Panel>
+      ))}
 
       <Panel title="Network" tone="raised">
         <dl className="space-y-3">
@@ -182,7 +197,7 @@ function GlobalStats() {
           <NetRow k="Block time" v="1.0s" />
           <NetRow k="Stack" v="OP Stack" />
           <NetRow k="Gas token" v={DEFAULT_CHAIN.currency.symbol} />
-          <NetRow k="Settlement" v="Ethereum" />
+          <NetRow k="Pools" v={String(STATS.pools)} />
         </dl>
         <a
           href={DEFAULT_CHAIN.explorer}

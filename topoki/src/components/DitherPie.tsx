@@ -7,7 +7,7 @@ import {
   type PieSlice,
 } from './dither-kit/polar'
 import { BAYER, OFF_TIER, backingSize, bloomLayerStyle, clamp01 } from './dither-kit/dither-paint'
-import { PALETTE, rgb, type Seed } from './dither-kit/palette'
+import { PALETTE, SERIES_COLORS, rgb } from './dither-kit/palette'
 import { cx } from '../lib/cx'
 
 /* =========================================================================
@@ -67,9 +67,7 @@ export function DitherPie({
     const rOuter = Math.min(cols, rows) / 2 - 1
     const rInner = rOuter * (1 - thickness)
 
-    // Each slice gets its own density tier so neighbours separate without a
-    // second colour. Tiers cycle so a long list never fades to nothing.
-    const TIERS = [1, 0.62, 0.84, 0.46, 0.72]
+    // One hue per asset, from the kit's series palette.
 
     for (let y = 0; y < rows; y++) {
       for (let x = 0; x < cols; x++) {
@@ -80,13 +78,12 @@ export function DitherPie({
         const idx = sliceAtAngle(slices, Math.atan2(dy, dx))
         if (idx < 0) continue
 
-        const tier = TIERS[idx % TIERS.length]
         // dense at the outer edge, thinning inward — the radial falloff
         const radial = (r - rInner) / Math.max(1, rOuter - rInner)
         const lift = hover === idx ? 0.22 : 0
-        const density = tier * (0.45 + 0.55 * radial) + lift
+        const density = 0.55 + 0.45 * radial + lift
         const lit = density > BAYER[y & 3][x & 3]
-        const seed: Seed = PALETTE.ember
+        const seed = PALETTE[SERIES_COLORS[idx % SERIES_COLORS.length]]
         const k = (0.35 + density * 0.65) * (hover === idx ? 1.2 : 1)
         ctx.fillStyle = rgb(seed.fill, 1, clamp01(lit ? k : k * OFF_TIER))
         ctx.fillRect(x, y, 1, 1)
@@ -223,7 +220,9 @@ function PieLegend({
                 aria-hidden
                 className="size-2 shrink-0"
                 style={{
-                  backgroundColor: rgb(PALETTE.ember.fill, 1, [1, 0.62, 0.84, 0.46, 0.72][i % 5]),
+                  backgroundColor: rgb(
+                    PALETTE[SERIES_COLORS[i % SERIES_COLORS.length]].fill,
+                  ),
                 }}
               />
               <span className="min-w-0 truncate text-ash">{s.name}</span>
