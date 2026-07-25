@@ -145,14 +145,21 @@ function GlobalStats() {
     () => POOLS[0].series.map((_, i) => POOLS.reduce((sum, p) => sum + p.series[i], 0)),
     [],
   )
+  // each pool contributes its own turnover and fee rate, so both lines keep the
+  // walk's shape instead of the sine wave a flat multiplier would give
   const volSeries = useMemo(
     () =>
-      tvlSeries.map((v, i) => v * (0.9 + 0.35 * Math.sin(i / 7)) * (STATS.volume24h / STATS.tvl)),
-    [tvlSeries],
+      POOLS[0].series.map((_, i) =>
+        POOLS.reduce((sum, p) => sum + p.series[i] * (p.volume24h / p.tvl), 0),
+      ),
+    [],
   )
   const feeSeries = useMemo(
-    () => volSeries.map((v) => v * (STATS.fees24h / STATS.volume24h)),
-    [volSeries],
+    () =>
+      POOLS[0].series.map((_, i) =>
+        POOLS.reduce((sum, p) => sum + p.series[i] * (p.fees24h / p.tvl), 0),
+      ),
+    [],
   )
 
   const cards: { label: string; value: string; delta: number; series: number[] }[] = [
