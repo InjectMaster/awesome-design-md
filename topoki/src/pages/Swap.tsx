@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import {
-  Badge,
   Button,
   Delta,
   Panel,
@@ -12,7 +11,6 @@ import {
 } from '../components/primitives'
 import { cx } from '../lib/cx'
 import { Spark } from '../components/charts'
-import { DitherChart } from '../components/DitherChart'
 import { DitherBar } from '../components/DitherBar'
 import { Modal } from '../components/Modal'
 import { TokenSelect } from '../components/TokenSelect'
@@ -20,13 +18,16 @@ import { useWallet } from '../lib/wallet'
 import { useBalances } from '../lib/portfolio'
 import {
   TOKENS,
-  findPool,
   quote as getQuote,
-  recentTrades,
   token,
   type Quote,
 } from '../lib/market'
-import { ago, amount as fmtAmount, truncAddress, usd } from '../lib/format'
+import {
+  amount as fmtAmount,
+  price as fmtPrice,
+  truncAddress,
+  usd,
+} from '../lib/format'
 import { DEFAULT_CHAIN, txUrl } from '../lib/chain'
 
 const SLIPPAGE_PRESETS = [10, 50, 100]
@@ -64,11 +65,6 @@ export function SwapPage() {
   const insufficient = wallet.address !== null && amountIn > balance
   const tokenFrom = token(from)
   const tokenTo = token(to)
-  const pool = findPool(from, to)
-  const pairSeries = useMemo(
-    () => tokenFrom.series.map((v, i) => v / tokenTo.series[i]),
-    [tokenFrom, tokenTo],
-  )
 
   // keep the URL shareable: /swap?from=ETH&to=GIWA
   useEffect(() => {
@@ -102,9 +98,9 @@ export function SwapPage() {
   }
 
   return (
-    <div className="mx-auto grid max-w-[1400px] gap-4 px-4 py-6 sm:px-6 lg:grid-cols-12 lg:gap-5">
+    <div className="mx-auto flex w-full max-w-[520px] flex-col gap-3 px-4 py-6 sm:px-6">
       {/* ------------------------------------------------------- swap card */}
-      <div className="lg:col-span-5 xl:col-span-4">
+      <div>
         <Panel
           title="Swap"
           tone="raised"
@@ -244,55 +240,13 @@ export function SwapPage() {
         </Panel>
       </div>
 
-      {/* -------------------------------------------------- market column */}
-      <div className="space-y-4 lg:col-span-7 xl:col-span-8">
-        <Panel
-          title={`${from} / ${to}`}
-          tone="default"
-          actions={
-            <div className="flex items-center gap-2">
-              <Badge tone="mute">{pool ? `${pool.feeBps / 100}% fee` : 'routed'}</Badge>
-              <Badge tone="neutral">7D</Badge>
-            </div>
-          }
-        >
-          <div className="mb-4 flex flex-wrap items-end justify-between gap-4">
-            <div>
-              <div className="label mb-1">Mid price</div>
-              <div className="tnum flex items-baseline gap-3">
-                <span className="figure text-2xl text-bone sm:text-3xl">
-                  {fmtAmount(tokenFrom.price / tokenTo.price, 6)}
-                </span>
-                <span className="text-xs text-smoke">
-                  {to} per {from}
-                </span>
-              </div>
-            </div>
-            <div className="flex gap-6">
-              <div>
-                <div className="label mb-1">{from} 24H</div>
-                <Delta value={tokenFrom.change24h} />
-              </div>
-              <div>
-                <div className="label mb-1">{to} 24H</div>
-                <Delta value={tokenTo.change24h} />
-              </div>
-            </div>
-          </div>
-
-          <DitherChart
-            series={pairSeries}
-            height={168}
-            bloom="low"
-            label={`${from}/${to} · 168H`}
-            format={(n) => fmtAmount(n, 6)}
-          />
-        </Panel>
-
-        <div className="grid gap-4 sm:grid-cols-2">
-          <PoolCard from={from} to={to} />
-          <TradesCard from={from} to={to} />
-        </div>
+      {/* ------------------------------------------------- pair readouts --
+          The chart is deliberately small: two compact cards, one per side of
+          the pair. A DEX screen is for trading, not for chart-reading — the
+          full history lives on Explore. */}
+      <div className="grid gap-3 sm:grid-cols-2">
+        <PairCard symbol={from} />
+        <PairCard symbol={to} />
       </div>
 
       {/* ----------------------------------------------------------- modals */}
@@ -440,109 +394,34 @@ function RouteDiagram({ quote }: { quote: Quote }) {
 
 /* ------------------------------------------------------------- side cards -- */
 
-function PoolCard({ from, to }: { from: string; to: string }) {
-  const pool = findPool(from, to)
-  if (!pool) {
-    return (
-      <Panel title="Pool">
-        <p className="text-xs text-smoke">
-          No direct pool. This pair is routed through a hub asset.
-        </p>
-      </Panel>
-    )
-  }
-  // reserves implied by a 50/50 split of the pool's TVL
-  const half = pool.tvl / 2
-  const reserves: [string, number][] = [
-    [pool.base, half / token(pool.base).price],
-    [pool.quote, half / token(pool.quote).price],
-  ]
+/**
+ * A pair readout: symbol, price, 24h move and a small trend line. This is the
+ * chart on the swap screen — capped at this size on purpose.
+ */
+function PairCard({ symbol }: { symbol: string }) {
+  const t = token(symbol)
+  const up = t.change24h >= 0
 
   return (
-    <Panel title="Pool" actions={<Spark series={pool.series} />}>
-      <div className="grid grid-cols-2 gap-y-3">
-        <Metric label="TVL" value={usd(pool.tvl, { compact: true })} />
-        <Metric label="Volume 24H" value={usd(pool.volume24h, { compact: true })} />
-        <Metric label="Fees 24H" value={usd(pool.fees24h, { compact: true })} />
-        <Metric label="APR" value={`${pool.apr.toFixed(2)}%`} accent />
+    <div className="corner-frame border border-line bg-ink/60 p-3 transition-colors hover:border-line-2">
+      <div className="flex items-start justify-between gap-2">
+        <span className="flex items-center gap-2">
+          <TokenMark symbol={symbol} size="sm" />
+          <span className="text-xs text-bone">{symbol}</span>
+        </span>
+        <span className="text-right">
+          <span className="figure block text-sm leading-none text-bone">
+            {fmtPrice(t.price)}
+          </span>
+          <Delta value={t.change24h} className="mt-1 text-2xs" />
+        </span>
       </div>
-
-      <Rule className="my-3" label="reserves" />
-
-      <div className="space-y-1.5">
-        {reserves.map(([sym, qty]) => (
-          <div key={sym} className="flex items-baseline gap-3 text-xs">
-            <span className="w-14 shrink-0 text-ash">{sym}</span>
-            <span className="h-px flex-1 translate-y-[-3px] bg-line" />
-            <span className="tnum text-smoke">{fmtAmount(qty, 2)}</span>
-          </div>
-        ))}
-      </div>
-    </Panel>
-  )
-}
-
-function Metric({
-  label,
-  value,
-  accent,
-}: {
-  label: string
-  value: string
-  accent?: boolean
-}) {
-  return (
-    <div>
-      <div className="label mb-1">{label}</div>
-      <div className={cx('tnum text-sm', accent ? 'text-ember' : 'text-bone')}>{value}</div>
+      <Spark
+        series={t.series}
+        width={220}
+        className={cx('mt-3 w-full', up ? 'opacity-100' : 'opacity-80')}
+      />
     </div>
-  )
-}
-
-function TradesCard({ from, to }: { from: string; to: string }) {
-  const [now, setNow] = useState(() => Date.now())
-  useEffect(() => {
-    const id = setInterval(() => setNow(Date.now()), 5000)
-    return () => clearInterval(id)
-  }, [])
-
-  const trades = useMemo(
-    () =>
-      recentTrades(60, now)
-        .filter(
-          (t) =>
-            (t.from === from && t.to === to) || (t.from === to && t.to === from),
-        )
-        .slice(0, 6),
-    [from, to, now],
-  )
-
-  return (
-    <Panel title="Recent trades" bodyClassName="p-0">
-      {trades.length === 0 ? (
-        <p className="p-4 text-xs text-smoke">No trades on this pair yet.</p>
-      ) : (
-        <ul className="divide-y divide-line">
-          {trades.map((t) => (
-            <li
-              key={t.hash}
-              className="grid grid-cols-[3rem_1fr_auto_2.5rem] items-center gap-2 px-3 py-2 text-2xs"
-            >
-              <span className={cx(t.from === from ? 'text-ember' : 'text-ash')}>
-                {t.from === from ? 'BUY' : 'SELL'}
-              </span>
-              <span className="tnum truncate text-bone">
-                {fmtAmount(t.amountIn, 4)} <span className="text-dust">{t.from}</span>
-              </span>
-              <span className="tnum text-right text-smoke">
-                {usd(t.valueUsd, { compact: true })}
-              </span>
-              <span className="tnum text-right text-dust">{ago(t.ts, now)}</span>
-            </li>
-          ))}
-        </ul>
-      )}
-    </Panel>
   )
 }
 
