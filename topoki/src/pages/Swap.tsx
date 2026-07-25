@@ -12,6 +12,7 @@ import {
 import { cx } from '../lib/cx'
 import { Spark } from '../components/charts'
 import { DitherBar } from '../components/DitherBar'
+import { Caret as PixelCaret } from '../components/PixelArt'
 import { Modal } from '../components/Modal'
 import { TokenSelect } from '../components/TokenSelect'
 import { useWallet } from '../lib/wallet'
@@ -145,7 +146,7 @@ export function SwapPage() {
                   flipping && 'rotate-180 text-ember',
                 )}
               >
-                <span className="text-[13px] leading-none">v^</span>
+                <PixelCaret dir="down" />
               </button>
             </div>
 
