@@ -81,6 +81,27 @@ Requires Node 20+.
 serve one static page with no rewrite rules. `vercel.json` covers the normal
 build with an SPA rewrite.
 
+## Review loop
+
+`npm run dev` mounts the [Agentation](https://agentation.com) toolbar, bottom
+right. Click it, click any element — or drag across several, or over empty space —
+write a note, and **Copy** puts structured output on the clipboard: selector, DOM
+path, bounding box, CSS classes, nearby text. Paste that to an agent and it lands
+on the right line without a round of *which button did you mean*. The toolbar also
+pauses every animation, which is how you annotate the dithered button mid-cycle or
+the ticker mid-scroll.
+
+To skip the clipboard and let the agent read annotations directly:
+
+```bash
+npx agentation-mcp                                   # serves on :4747
+VITE_AGENTATION_ENDPOINT=http://localhost:4747 npm run dev
+```
+
+The toolbar is on in dev and in preview builds started with `VITE_AGENTATION=1`.
+It is a `devDependency` behind a lazy import, so a production build never pulls it
+in — `npm run build` is unaffected.
+
 ## Stack
 
 React 19 · TypeScript · Vite 8 · Tailwind CSS 4 · React Router 7. The app is set in a
