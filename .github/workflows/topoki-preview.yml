@@ -1,0 +1,70 @@
+name: TOPOKI preview
+
+# Publishes the TOPOKI front end to GitHub Pages so it can be reviewed in a
+# browser without a local checkout. The build routes on the hash and carries the
+# Agentation annotation toolbar, because Pages serves static files with no
+# rewrite rules and this URL exists for review.
+
+on:
+  push:
+    branches: [claude/topoki-dex-design-8vch9q]
+    paths:
+      - 'topoki/**'
+      - '.github/workflows/topoki-preview.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Pages holds one live deployment; a newer build supersedes one still running.
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: topoki
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: topoki/package-lock.json
+
+      - run: npm ci
+
+      - id: pages
+        uses: actions/configure-pages@v5
+        with:
+          # Creates the Pages site on the first run instead of failing.
+          enablement: true
+
+      - name: Typecheck
+        run: npx tsc -b
+
+      - name: Build
+        env:
+          VITE_HASH_ROUTER: '1'
+          VITE_AGENTATION: '1'
+        run: npx vite build --base="${{ steps.pages.outputs.base_path }}/"
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: topoki/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
