@@ -223,3 +223,52 @@ in `dust`.
 
 Copy this file into a project root and tell an agent: *"build me a page that looks like
 this."* The three rules in §1 do most of the work; §2 and §5 do the rest.
+
+---
+
+## 10. The Figma library
+
+This file has a counterpart in Figma:
+[TOPOKI — Design System](https://www.figma.com/design/DwHTYRA1Z7lwCtxH6hea4t).
+It is generated from this document, not drawn by hand, so the two are meant to agree.
+
+**Pages.** Cover → Foundations (Colour, Type, Geometry) → Components (Containers,
+Actions, Data, Marks) → Maquette. The maquette holds the three screens the system was
+extracted from; everything before it is the system itself.
+
+**Tokens are variables.** One `TOPOKI` collection, 36 variables: the 21 colours of §2 as
+`surface/*`, `line/*`, `type/*`, `accent/*`, `series/*`, and 15 numbers — the 4px scale
+as `space/1…6`, the ramp as `text/*`, plus `radius/none` and `stroke/hairline`, which
+are 0 and 1 and are the two most load-bearing values in the system. Every fill in the
+file is *bound* to one of them — no loose hexes — so changing a variable propagates
+through the whole file the way changing a CSS custom property propagates through the app.
+
+| DESIGN.md | Figma variable |
+|---|---|
+| `void`, `ink`, `ink-2`, `ink-3` | `surface/void`, `surface/ink`, `surface/ink-2`, `surface/ink-3` |
+| `line`, `line-2`, `line-3` | `line/line`, `line/line-2`, `line/line-3` |
+| `bone`, `ash`, `smoke`, `dust` | `type/bone`, `type/ash`, `type/smoke`, `type/dust` |
+| `ember`, `ember-soft`, `ember-dim`, `ember-deep`, `alert` | `accent/*` |
+| chart series | `series/blue…red` — the §2 exception, allocation ring only |
+
+**The ramp is ten text styles.** `display/xl`, `display/md`, `figure/page`,
+`figure/panel`, `panel-title`, `label`, `body`, `data-cell`, `button`, `micro` — the
+same ten of §3, with the uppercasing and tracking baked into the style rather than
+applied per layer. The single shadow of §4 is the `bloom/ember` effect style, and the
+page-level wash behind the masthead is `bloom/page` — those two are the only effects
+in the file.
+
+**Components carry the rules in their descriptions.** Panel, Field, Button (4 kinds ×
+3 heights), Badge, Tab, TableRow, Stat, ChartPlaceholder, TokenMark, Caret, LiveDot.
+Select any one of them in Figma and the description states the constraint that governs
+it — the ember budget on Button, the no-green rule on Stat and TableRow, the
+never-reflow rule on TableRow.
+
+**Two things the file cannot show.** The dithered fills of §5 are flat ember in Figma;
+the ordered-dither texture only exists at runtime, on canvas. And the page face is
+Geist Mono throughout, because the pixel face of §3 is not a Figma-hosted font — the
+type page names what each style is in the build.
+
+**Keeping them in sync.** This document is upstream. Change a value here, then change
+the matching variable or style in Figma — never the other way round, and never by
+editing a component's fill directly.
